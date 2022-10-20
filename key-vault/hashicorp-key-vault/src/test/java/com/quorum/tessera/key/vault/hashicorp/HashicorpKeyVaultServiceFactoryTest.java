@@ -313,4 +313,55 @@ public class HashicorpKeyVaultServiceFactoryTest {
 
     assertThat(result).isInstanceOf(HashicorpKeyVaultService.class);
   }
+
+  @Test
+  public void returnedValueIsCorrectTypeUsingNamespaceVaultTemplate() {
+    when(envProvider.getEnv(HASHICORP_ROLE_ID)).thenReturn("role-id");
+    when(envProvider.getEnv(HASHICORP_SECRET_ID)).thenReturn("secret-id");
+    when(envProvider.getEnv(HASHICORP_TOKEN)).thenReturn("token");
+
+    KeyConfiguration keyConfiguration = mock(KeyConfiguration.class);
+    when(config.getKeys()).thenReturn(keyConfiguration);
+
+    DefaultKeyVaultConfig keyVaultConfig = mock(DefaultKeyVaultConfig.class);
+    when(keyConfiguration.getKeyVaultConfig(KeyVaultType.HASHICORP))
+        .thenReturn(Optional.of(keyVaultConfig));
+
+    when(keyVaultConfig.getProperty("url")).thenReturn(Optional.of("http://someurl"));
+    when(keyVaultConfig.getProperty("approlePath")).thenReturn(Optional.of("approle"));
+    when(keyVaultConfig.getProperty("namespace")).thenReturn(Optional.of("sample_namespace"));
+    when(keyVaultConfig.hasProperty("namespace")).thenReturn(true);
+
+    setUpUtilMocks(keyVaultConfig);
+
+    KeyVaultService result =
+        keyVaultServiceFactory.create(config, envProvider, keyVaultServiceFactoryUtil);
+
+    assertThat(result).isInstanceOf(HashicorpKeyVaultService.class);
+  }
+
+  @Test
+  public void returnedValueIsCorrectTypeUsingNamespaceVaultTemplate2ArgConstructor() {
+    when(envProvider.getEnv(HASHICORP_ROLE_ID)).thenReturn("role-id");
+    when(envProvider.getEnv(HASHICORP_SECRET_ID)).thenReturn("secret-id");
+    when(envProvider.getEnv(HASHICORP_TOKEN)).thenReturn("token");
+
+    KeyConfiguration keyConfiguration = mock(KeyConfiguration.class);
+    when(config.getKeys()).thenReturn(keyConfiguration);
+
+    DefaultKeyVaultConfig keyVaultConfig = mock(DefaultKeyVaultConfig.class);
+    when(keyConfiguration.getKeyVaultConfig(KeyVaultType.HASHICORP))
+        .thenReturn(Optional.of(keyVaultConfig));
+
+    when(keyVaultConfig.getProperty("url")).thenReturn(Optional.of("http://someurl"));
+    when(keyVaultConfig.getProperty("approlePath")).thenReturn(Optional.of("approle"));
+    when(keyVaultConfig.getProperty("namespace")).thenReturn(Optional.of("sample_namespace"));
+    when(keyVaultConfig.hasProperty("namespace")).thenReturn(true);
+
+    setUpUtilMocks(keyVaultConfig);
+
+    KeyVaultService result = keyVaultServiceFactory.create(config, envProvider);
+
+    assertThat(result).isInstanceOf(HashicorpKeyVaultService.class);
+  }
 }
