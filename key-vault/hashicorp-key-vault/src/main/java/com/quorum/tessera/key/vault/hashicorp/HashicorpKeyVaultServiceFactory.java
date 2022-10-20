@@ -15,6 +15,9 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
+import org.springframework.vault.client.RestTemplateBuilder;
+import org.springframework.vault.client.SimpleVaultEndpointProvider;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultTemplate;
@@ -22,6 +25,8 @@ import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 
 public class HashicorpKeyVaultServiceFactory implements KeyVaultServiceFactory {
+
+  protected static final String NAMESPACE_KEY = "namespace";
 
   @Override
   public KeyVaultService create(Config config, EnvironmentVariableProvider envProvider) {
@@ -97,11 +102,39 @@ public class HashicorpKeyVaultServiceFactory implements KeyVaultServiceFactory {
             keyVaultConfig, envProvider, clientHttpRequestFactory, vaultEndpoint);
 
     SessionManager sessionManager = new SimpleSessionManager(clientAuthentication);
+
     VaultOperations vaultOperations =
-        new VaultTemplate(vaultEndpoint, clientHttpRequestFactory, sessionManager);
+        getVaultOperations(keyVaultConfig, vaultEndpoint, clientHttpRequestFactory, sessionManager);
 
     return new HashicorpKeyVaultService(
         vaultOperations, () -> new VaultVersionedKeyValueTemplateFactory() {});
+  }
+
+  private VaultOperations getVaultOperations(
+      KeyVaultConfig keyVaultConfig,
+      VaultEndpoint vaultEndpoint,
+      ClientHttpRequestFactory clientHttpRequestFactory,
+      SessionManager sessionManager) {
+
+    VaultOperations vaultOperations;
+    if (keyVaultConfig.hasProperty(NAMESPACE_KEY)
+        && keyVaultConfig.getProperty(NAMESPACE_KEY).isPresent()) {
+      String namespace = keyVaultConfig.getProperty(NAMESPACE_KEY).get();
+      RestTemplateBuilder restTemplateBuilder =
+          RestTemplateBuilder.builder()
+              .endpointProvider(SimpleVaultEndpointProvider.of(vaultEndpoint))
+              .requestFactory(clientHttpRequestFactory)
+              .customizers(
+                  restTemplate ->
+                      restTemplate
+                          .getInterceptors()
+                          .add(VaultClients.createNamespaceInterceptor(namespace)));
+      vaultOperations = new VaultTemplate(restTemplateBuilder, sessionManager);
+    } else {
+      vaultOperations = new VaultTemplate(vaultEndpoint, clientHttpRequestFactory, sessionManager);
+    }
+
+    return vaultOperations;
   }
 
   @Override
