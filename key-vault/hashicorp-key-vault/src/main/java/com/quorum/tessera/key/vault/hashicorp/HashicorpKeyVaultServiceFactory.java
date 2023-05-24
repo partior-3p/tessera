@@ -95,8 +95,6 @@ public class HashicorpKeyVaultServiceFactory implements KeyVaultServiceFactory {
       throw new ConfigException(
           new RuntimeException("Provided Hashicorp Vault url is incorrectly formatted", e));
     }
-    LOGGER.info(
-        "Namespace for Hashicorp key vault is {}", keyVaultConfig.getProperty(NAMESPACE_KEY).get());
 
     SslConfiguration sslConfiguration = util.configureSsl(keyVaultConfig, envProvider);
 
@@ -136,6 +134,8 @@ public class HashicorpKeyVaultServiceFactory implements KeyVaultServiceFactory {
 
     if (keyVaultConfig.hasProperty(NAMESPACE_KEY)
         && keyVaultConfig.getProperty(NAMESPACE_KEY).isPresent()) {
+      LOGGER.info(
+        "Namespace for Hashicorp key vault is {}", keyVaultConfig.getProperty(NAMESPACE_KEY).get());
       LOGGER.info("Inside getVaultOperations IF Loop");
 
       String namespace = keyVaultConfig.getProperty(NAMESPACE_KEY).get();
