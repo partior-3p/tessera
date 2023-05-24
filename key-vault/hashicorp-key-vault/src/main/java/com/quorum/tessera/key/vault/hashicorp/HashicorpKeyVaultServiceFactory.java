@@ -135,7 +135,8 @@ public class HashicorpKeyVaultServiceFactory implements KeyVaultServiceFactory {
     if (keyVaultConfig.hasProperty(NAMESPACE_KEY)
         && keyVaultConfig.getProperty(NAMESPACE_KEY).isPresent()) {
       LOGGER.info(
-        "Namespace for Hashicorp key vault is {}", keyVaultConfig.getProperty(NAMESPACE_KEY).get());
+          "Namespace for Hashicorp key vault is {}",
+          keyVaultConfig.getProperty(NAMESPACE_KEY).get());
       LOGGER.info("Inside getVaultOperations IF Loop");
 
       String namespace = keyVaultConfig.getProperty(NAMESPACE_KEY).get();
