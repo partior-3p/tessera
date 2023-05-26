@@ -14,9 +14,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.vault.authentication.ClientAuthentication;
+import org.springframework.vault.client.RestTemplateBuilder;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
+import org.springframework.web.client.RestTemplate;
 
 public class HashicorpKeyVaultServiceFactoryTest {
 
@@ -259,12 +261,17 @@ public class HashicorpKeyVaultServiceFactoryTest {
         .thenReturn(clientHttpRequestFactory);
 
     ClientAuthentication clientAuthentication = mock(ClientAuthentication.class);
+    RestTemplateBuilder restTemplateBuilder = mock(RestTemplateBuilder.class);
     when(keyVaultServiceFactoryUtil.configureClientAuthentication(
             eq(keyVaultConfig),
             eq(envProvider),
             eq(clientHttpRequestFactory),
             any(VaultEndpoint.class)))
         .thenReturn(clientAuthentication);
+    when(keyVaultServiceFactoryUtil.getRestTemplateWithVaultNamespace(
+            anyString(), eq(clientHttpRequestFactory), any(VaultEndpoint.class)))
+        .thenReturn(restTemplateBuilder);
+    when(restTemplateBuilder.build()).thenReturn(new RestTemplate());
   }
 
   @Test
