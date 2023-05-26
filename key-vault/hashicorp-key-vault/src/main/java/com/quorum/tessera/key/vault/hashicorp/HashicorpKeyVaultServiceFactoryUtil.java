@@ -27,7 +27,7 @@ import org.springframework.web.client.RestOperations;
 
 class HashicorpKeyVaultServiceFactoryUtil {
 
-  protected static final String NAMESPACE_KEY = "namespace";
+  public static final String NAMESPACE_KEY = "namespace";
 
   private static final Logger LOGGER =
       LoggerFactory.getLogger(HashicorpKeyVaultServiceFactoryUtil.class);
@@ -96,15 +96,8 @@ class HashicorpKeyVaultServiceFactoryUtil {
           && keyVaultConfig.getProperty(NAMESPACE_KEY).isPresent()) {
         String namespace = keyVaultConfig.getProperty(NAMESPACE_KEY).get();
         LOGGER.info("Using namespace {} for login", namespace);
-        RestTemplateBuilder restTemplateBuilder =
-            RestTemplateBuilder.builder()
-                .endpointProvider(SimpleVaultEndpointProvider.of(vaultEndpoint))
-                .requestFactory(clientHttpRequestFactory)
-                .customizers(
-                    restTemplate ->
-                        restTemplate
-                            .getInterceptors()
-                            .add(VaultClients.createNamespaceInterceptor(namespace)));
+        var restTemplateBuilder =
+            getRestTemplateWithVaultNamespace(namespace, clientHttpRequestFactory, vaultEndpoint);
         restOperations = restTemplateBuilder.build();
       } else {
         LOGGER.info("No namespace");
@@ -135,5 +128,19 @@ class HashicorpKeyVaultServiceFactoryUtil {
     }
 
     return new TokenAuthentication(authToken);
+  }
+
+  RestTemplateBuilder getRestTemplateWithVaultNamespace(
+      String namespace,
+      ClientHttpRequestFactory clientHttpRequestFactory,
+      VaultEndpoint vaultEndpoint) {
+    return RestTemplateBuilder.builder()
+        .endpointProvider(SimpleVaultEndpointProvider.of(vaultEndpoint))
+        .requestFactory(clientHttpRequestFactory)
+        .customizers(
+            restTemplate ->
+                restTemplate
+                    .getInterceptors()
+                    .add(VaultClients.createNamespaceInterceptor(namespace)));
   }
 }

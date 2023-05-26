@@ -1,6 +1,7 @@
 package com.quorum.tessera.key.vault.hashicorp;
 
 import static com.quorum.tessera.config.util.EnvironmentVariables.*;
+import static com.quorum.tessera.key.vault.hashicorp.HashicorpKeyVaultServiceFactoryUtil.NAMESPACE_KEY;
 
 import com.quorum.tessera.config.*;
 import com.quorum.tessera.config.util.EnvironmentVariableProvider;
@@ -18,8 +19,6 @@ import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.client.RestTemplateBuilder;
-import org.springframework.vault.client.SimpleVaultEndpointProvider;
-import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultTemplate;
@@ -27,8 +26,6 @@ import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 
 public class HashicorpKeyVaultServiceFactory implements KeyVaultServiceFactory {
-
-  protected static final String NAMESPACE_KEY = "namespace";
 
   private static final Logger LOGGER =
       LoggerFactory.getLogger(HashicorpKeyVaultServiceFactory.class);
@@ -103,22 +100,16 @@ public class HashicorpKeyVaultServiceFactory implements KeyVaultServiceFactory {
     ClientHttpRequestFactory clientHttpRequestFactory =
         util.createClientHttpRequestFactory(clientOptions, sslConfiguration);
 
-    LOGGER.info("Before client authentication to the vault");
-
     ClientAuthentication clientAuthentication =
         util.configureClientAuthentication(
             keyVaultConfig, envProvider, clientHttpRequestFactory, vaultEndpoint);
 
-    LOGGER.info("Before Creating simple session manager");
-
     SessionManager sessionManager = new SimpleSessionManager(clientAuthentication);
 
-    LOGGER.info("After Creating simple session manager");
-
     VaultOperations vaultOperations =
-        getVaultOperations(keyVaultConfig, vaultEndpoint, clientHttpRequestFactory, sessionManager);
+        getVaultOperations(
+            keyVaultConfig, vaultEndpoint, clientHttpRequestFactory, sessionManager, util);
 
-    LOGGER.info("Fetched Vault operations");
     return new HashicorpKeyVaultService(
         vaultOperations, () -> new VaultVersionedKeyValueTemplateFactory() {});
   }
@@ -127,33 +118,24 @@ public class HashicorpKeyVaultServiceFactory implements KeyVaultServiceFactory {
       KeyVaultConfig keyVaultConfig,
       VaultEndpoint vaultEndpoint,
       ClientHttpRequestFactory clientHttpRequestFactory,
-      SessionManager sessionManager) {
+      SessionManager sessionManager,
+      HashicorpKeyVaultServiceFactoryUtil util) {
 
     VaultOperations vaultOperations;
-    LOGGER.info("Before Entering getVaultOperations IF Loop");
 
     if (keyVaultConfig.hasProperty(NAMESPACE_KEY)
         && keyVaultConfig.getProperty(NAMESPACE_KEY).isPresent()) {
       LOGGER.info(
           "Namespace for Hashicorp key vault is {}",
           keyVaultConfig.getProperty(NAMESPACE_KEY).get());
-      LOGGER.info("Inside getVaultOperations IF Loop");
 
       String namespace = keyVaultConfig.getProperty(NAMESPACE_KEY).get();
       RestTemplateBuilder restTemplateBuilder =
-          RestTemplateBuilder.builder()
-              .endpointProvider(SimpleVaultEndpointProvider.of(vaultEndpoint))
-              .requestFactory(clientHttpRequestFactory)
-              .customizers(
-                  restTemplate ->
-                      restTemplate
-                          .getInterceptors()
-                          .add(VaultClients.createNamespaceInterceptor(namespace)));
-      LOGGER.info("RestTemplateBuilder Built");
+          util.getRestTemplateWithVaultNamespace(
+              namespace, clientHttpRequestFactory, vaultEndpoint);
+
       vaultOperations = new VaultTemplate(restTemplateBuilder, sessionManager);
     } else {
-      LOGGER.info("Inside getVaultOperations Else Loop");
-
       vaultOperations = new VaultTemplate(vaultEndpoint, clientHttpRequestFactory, sessionManager);
     }
 
