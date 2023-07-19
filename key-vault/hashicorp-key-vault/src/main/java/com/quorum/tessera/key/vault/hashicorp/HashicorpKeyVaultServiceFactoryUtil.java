@@ -7,8 +7,6 @@ import com.quorum.tessera.config.util.EnvironmentVariableProvider;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -16,8 +14,6 @@ import org.springframework.vault.authentication.AppRoleAuthentication;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.TokenAuthentication;
-import org.springframework.vault.client.RestTemplateBuilder;
-import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
@@ -26,11 +22,6 @@ import org.springframework.vault.support.SslConfiguration;
 import org.springframework.web.client.RestOperations;
 
 class HashicorpKeyVaultServiceFactoryUtil {
-
-  public static final String NAMESPACE_KEY = "namespace";
-
-  private static final Logger LOGGER =
-      LoggerFactory.getLogger(HashicorpKeyVaultServiceFactoryUtil.class);
 
   SslConfiguration configureSsl(
       KeyVaultConfig keyVaultConfig, EnvironmentVariableProvider envProvider) {
@@ -91,18 +82,8 @@ class HashicorpKeyVaultServiceFactoryUtil {
               .secretId(AppRoleAuthenticationOptions.SecretId.provided(secretId))
               .build();
 
-      RestOperations restOperations;
-      if (keyVaultConfig.hasProperty(NAMESPACE_KEY)
-          && keyVaultConfig.getProperty(NAMESPACE_KEY).isPresent()) {
-        String namespace = keyVaultConfig.getProperty(NAMESPACE_KEY).get();
-        LOGGER.info("Using namespace {} for login", namespace);
-        var restTemplateBuilder =
-            getRestTemplateWithVaultNamespace(namespace, clientHttpRequestFactory, vaultEndpoint);
-        restOperations = restTemplateBuilder.build();
-      } else {
-        LOGGER.info("No namespace");
-        restOperations = VaultClients.createRestTemplate(vaultEndpoint, clientHttpRequestFactory);
-      }
+      RestOperations restOperations =
+          VaultClients.createRestTemplate(vaultEndpoint, clientHttpRequestFactory);
 
       return new AppRoleAuthentication(appRoleAuthenticationOptions, restOperations);
 
@@ -128,19 +109,5 @@ class HashicorpKeyVaultServiceFactoryUtil {
     }
 
     return new TokenAuthentication(authToken);
-  }
-
-  RestTemplateBuilder getRestTemplateWithVaultNamespace(
-      String namespace,
-      ClientHttpRequestFactory clientHttpRequestFactory,
-      VaultEndpoint vaultEndpoint) {
-    return RestTemplateBuilder.builder()
-        .endpointProvider(SimpleVaultEndpointProvider.of(vaultEndpoint))
-        .requestFactory(clientHttpRequestFactory)
-        .customizers(
-            restTemplate ->
-                restTemplate
-                    .getInterceptors()
-                    .add(VaultClients.createNamespaceInterceptor(namespace)));
   }
 }
