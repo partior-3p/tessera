@@ -89,6 +89,12 @@
    ]]></notes>
         <cve>CVE-2023-35116</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+        This suppresses all CVE entries that have a score below CVSS 7.
+        ]]></notes>
+        <cvssBelow>7</cvssBelow>
+    </suppress>
 
 
 </suppressions>
