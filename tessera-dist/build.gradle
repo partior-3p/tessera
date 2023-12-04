@@ -5,7 +5,7 @@ plugins {
 }
 
 ext {
-  awsJdkVersion = "2.17.204"
+  awsJdkVersion = "2.21.37"
   awsAdvancedJdbcWrapperVersion = "1.0.0"
 }
 
