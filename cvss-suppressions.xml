@@ -81,7 +81,6 @@
         <notes><![CDATA[
    FP per issue #5991
    ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.json/json@.*$</packageUrl>
-        <cpe>cpe:/a:json-java_project:json-java</cpe>
+        <cve>CVE-2023-5072</cve>
     </suppress>
 </suppressions>
