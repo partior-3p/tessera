@@ -5,7 +5,7 @@ plugins {
 }
 
 ext {
-  awsJdkVersion = "2.17.295"
+  awsJdkVersion = "2.21.5"
   awsAdvancedJdbcWrapperVersion = "1.0.0"
 }
 
@@ -37,8 +37,6 @@ configurations.all {
   exclude group: "io.swagger.core.v3", module: "swagger-parser"
   exclude group: "io.swagger.core.v3", module: "swagger-jaxrs2-jakarta"
   exclude group: "com.fasterxml.jackson.datatype"
-  exclude group: "io.netty", module: "netty-codec-http2"
-  exclude group: "io.netty", module: "netty-handler"
 }
 
 dependencies {
@@ -93,11 +91,7 @@ dependencies {
   implementation "org.glassfish.jersey.core:jersey-common"
   implementation "org.glassfish.jersey.core:jersey-client"
 
-  implementation( "software.amazon.awssdk:rds:$awsJdkVersion") {
-    exclude group: "io.netty", module: "netty-codec-http2"
-    exclude group: "io.netty", module: "netty-handler"
-
-  }
+  implementation "software.amazon.awssdk:rds:$awsJdkVersion"
 
   implementation "software.amazon.awssdk:sts:$awsJdkVersion"
   implementation "software.amazon.awssdk:auth:$awsJdkVersion"
