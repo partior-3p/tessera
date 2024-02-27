@@ -19,14 +19,6 @@
     </suppress>
     <suppress>
         <notes><![CDATA[
-   file name: spring-beans-5.3.20.jar, and other spring jars
-   Not applicable to how Spring libraries are used within hashicorp-key-vault module
-   ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.springframework/spring\-.*$</packageUrl>
-        <cve>CVE-2016-1000027</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
    file name: snakeyaml-1.33.jar
    ]]></notes>
         <packageUrl regex="true">^pkg:maven/org.yaml/snakeyaml@1.33</packageUrl>
@@ -85,4 +77,40 @@
         <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson-core@.*$</packageUrl>
         <cve>CVE-2022-45688</cve>
     </suppress>
+    <suppress base="true">
+        <notes><![CDATA[
+   FP per issue #5991
+   ]]></notes>
+        <cve>CVE-2023-5072</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: jackson-core-2.14.2.jar
+   ]]></notes>
+        <cve>CVE-2023-35116</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+        This suppresses all CVE entries that have a score below CVSS 7.
+        ]]></notes>
+        <cvssBelow>7</cvssBelow>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: jackson-core-2.14.2.jar
+   ]]></notes>
+        <cve>CVE-2022-45688</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: jackson-core-2.14.2.jar
+   ]]></notes>
+        <cve>CVE-2023-44487</cve>
+    </suppress>
+
+
+
+
+
+
 </suppressions>
