@@ -18,7 +18,7 @@ configurations.all {
   exclude group: "jakarta.json"
 }
 
-def springVersion = "5.3.32"
+def springVersion = "5.3.33"
 dependencies {
   implementation project(":config")
   implementation project(":key-vault:key-vault-api")
