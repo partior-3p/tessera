@@ -49,8 +49,7 @@ public class LegacyResendManagerImpl implements LegacyResendManager {
       return resendIndividual(request.getRecipient(), request.getHash());
     }
 
-    final LegacyWorkflowFactory batchWorkflowFactory =
-        new LegacyWorkflowFactory(enclave, discovery, payloadPublisher);
+    final LegacyWorkflowFactory batchWorkflowFactory = new LegacyWorkflowFactory(enclave, discovery, payloadPublisher);
 
     final BatchWorkflow batchWorkflow = batchWorkflowFactory.create();
 
@@ -74,39 +73,59 @@ public class LegacyResendManagerImpl implements LegacyResendManager {
     return ResendResponse.Builder.create().build();
   }
 
+  @Override
+  public ResendResponse resendV2(ResendRequest request) {
+    if (request.getType() == ResendRequest.ResendRequestType.INDIVIDUAL) {
+      return resendIndividualV2(request.getRecipient(), request.getHash());
+    } else {
+      return ResendResponse.Builder.create().build();
+    }
+  }
+
+  protected ResendResponse resendIndividualV2(
+      final PublicKey targetResendKey, final MessageHash messageHash) {
+    final EncryptedTransaction encryptedTransaction = encryptedTransactionDAO
+        .retrieveByHash(messageHash)
+        .orElseThrow(
+            () -> new TransactionNotFoundException(
+                "Message with hash " + messageHash + " was not found"));
+
+    final EncodedPayload payload = encryptedTransaction.getPayload();
+    final EncodedPayload formattedPayload = EncodedPayload.Builder.forRecipient(payload, targetResendKey).build();
+    this.payloadPublisher.publishPayload(formattedPayload, targetResendKey);
+    return ResendResponse.Builder.create().withPayload(formattedPayload).build();
+  }
+
   protected ResendResponse resendIndividual(
       final PublicKey targetResendKey, final MessageHash messageHash) {
-    final EncryptedTransaction encryptedTransaction =
-        encryptedTransactionDAO
-            .retrieveByHash(messageHash)
-            .orElseThrow(
-                () ->
-                    new TransactionNotFoundException(
-                        "Message with hash " + messageHash + " was not found"));
+    final EncryptedTransaction encryptedTransaction = encryptedTransactionDAO
+        .retrieveByHash(messageHash)
+        .orElseThrow(
+            () -> new TransactionNotFoundException(
+                "Message with hash " + messageHash + " was not found"));
 
     final EncodedPayload payload = encryptedTransaction.getPayload();
 
-    if (payload.getPrivacyMode() != PrivacyMode.STANDARD_PRIVATE) {
-      throw new EnhancedPrivacyNotSupportedException(
-          "Cannot resend enhanced privacy transaction in legacy resend");
-    }
+    // if (payload.getPrivacyMode() != PrivacyMode.STANDARD_PRIVATE) {
+    // throw new EnhancedPrivacyNotSupportedException(
+    // "Cannot resend enhanced privacy transaction in legacy resend");
+    // }
 
     if (!Objects.equals(payload.getSenderKey(), targetResendKey)) {
-      final EncodedPayload formattedPayload =
-          EncodedPayload.Builder.forRecipient(payload, targetResendKey).build();
+      final EncodedPayload formattedPayload = EncodedPayload.Builder.forRecipient(payload, targetResendKey).build();
+      System.out.println(formattedPayload);
+      System.out.println(formattedPayload.getCipherText());
       return ResendResponse.Builder.create().withPayload(formattedPayload).build();
     }
 
     // split all the boxes out into their own payload
-    final Set<EncodedPayload> allTxns =
-        payload.getRecipientBoxes().stream()
-            .map(
-                box ->
-                    EncodedPayload.Builder.from(payload)
-                        .withNewRecipientKeys(Collections.emptyList())
-                        .withRecipientBoxes(List.of(box.getData()))
-                        .build())
-            .collect(Collectors.toSet());
+    final Set<EncodedPayload> allTxns = payload.getRecipientBoxes().stream()
+        .map(
+            box -> EncodedPayload.Builder.from(payload)
+                .withNewRecipientKeys(Collections.emptyList())
+                .withRecipientBoxes(List.of(box.getData()))
+                .build())
+        .collect(Collectors.toSet());
 
     final BatchWorkflowContext context = new BatchWorkflowContext();
     context.setPayloadsToPublish(allTxns);
@@ -114,10 +133,9 @@ public class LegacyResendManagerImpl implements LegacyResendManager {
 
     new SearchRecipientKeyForPayload(enclave).execute(context);
 
-    final EncodedPayload.Builder builder =
-        EncodedPayload.Builder.from(payload)
-            .withNewRecipientKeys(new ArrayList<>())
-            .withRecipientBoxes(new ArrayList<>());
+    final EncodedPayload.Builder builder = EncodedPayload.Builder.from(payload)
+        .withNewRecipientKeys(new ArrayList<>())
+        .withRecipientBoxes(new ArrayList<>());
     context
         .getPayloadsToPublish()
         .forEach(

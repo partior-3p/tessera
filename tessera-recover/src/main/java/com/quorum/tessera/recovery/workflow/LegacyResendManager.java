@@ -9,6 +9,8 @@ public interface LegacyResendManager {
 
   ResendResponse resend(ResendRequest request);
 
+  ResendResponse resendV2(ResendRequest request);
+
   static LegacyResendManager create() {
     return ServiceLoaderUtil.loadSingle(ServiceLoader.load(LegacyResendManager.class));
   }
