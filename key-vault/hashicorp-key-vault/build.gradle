@@ -26,7 +26,7 @@ dependencies {
   implementation("org.springframework.vault:spring-vault-core:2.3.2") {
     exclude group: "org.springframework",module: "spring-core"
   }
-  implementation "com.squareup.okhttp3:okhttp:3.12.3"
+  implementation "com.squareup.okhttp3:okhttp:4.9.2"
 
   implementation "org.springframework:spring-orm:$springVersion"
   testImplementation "org.springframework:spring-test:$springVersion"
