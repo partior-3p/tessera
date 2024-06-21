@@ -18,17 +18,15 @@ configurations.all {
   exclude group: "jakarta.json"
 }
 
-// 5.3.33
 def springVersion = "6.0.2"
 dependencies {
   implementation project(":config")
   implementation project(":key-vault:key-vault-api")
 
-  // 2.3.2
   implementation("org.springframework.vault:spring-vault-core:3.0.0") {
     exclude group: "org.springframework",module: "spring-core"
   }
-  implementation "com.squareup.okhttp3:okhttp:3.12.3"
+  implementation "com.squareup.okhttp3:okhttp:4.9.2"
 
   implementation "org.springframework:spring-orm:$springVersion"
   testImplementation "org.springframework:spring-test:$springVersion"
