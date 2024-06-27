@@ -37,6 +37,10 @@ configurations.all {
   exclude group: "io.swagger.core.v3", module: "swagger-parser"
   exclude group: "io.swagger.core.v3", module: "swagger-jaxrs2-jakarta"
   exclude group: "com.fasterxml.jackson.datatype"
+
+  resolutionStrategy {
+    force 'io.netty:netty-codec-http2:4.1.108.Final'
+  }
 }
 
 dependencies {
