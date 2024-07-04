@@ -4,6 +4,7 @@ import com.quorum.tessera.config.AppType;
 import com.quorum.tessera.config.Config;
 import com.quorum.tessera.config.ServerConfig;
 import com.quorum.tessera.config.apps.TesseraApp;
+import com.quorum.tessera.config.util.IntervalPropertyHelper;
 import com.quorum.tessera.recovery.Recovery;
 import com.quorum.tessera.server.TesseraServer;
 import com.quorum.tessera.server.TesseraServerFactory;
@@ -84,6 +85,8 @@ public enum Launcher {
     public List<TesseraServer> launchServer(final Config config) throws Exception {
 
       final ServerConfig recoveryP2PServer = config.getP2PServerConfig();
+      final IntervalPropertyHelper intervalPropertyHelper =
+        new IntervalPropertyHelper(config.getP2PServerConfig().getProperties());
 
       final Object app =
           ServiceLoader.load(TesseraApp.class).stream()
@@ -116,8 +119,9 @@ public enum Launcher {
       recoveryServer.start();
       LOGGER.debug("Started recovery server");
 
-      LOGGER.info("Waiting for nodes to synchronise with peers");
-      Thread.sleep(10000);
+      final var waitTimeBeforeRecoveryStartsInMillis = intervalPropertyHelper.partyInfoInterval() * 2L;
+      LOGGER.info("Waiting for nodes to synchronise with peers for {} seconds", waitTimeBeforeRecoveryStartsInMillis / 1000L);
+      Thread.sleep(waitTimeBeforeRecoveryStartsInMillis);
 
       final int exitCode = Recovery.create().recover();
 
