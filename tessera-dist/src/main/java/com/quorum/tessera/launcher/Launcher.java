@@ -86,7 +86,7 @@ public enum Launcher {
 
       final ServerConfig recoveryP2PServer = config.getP2PServerConfig();
       final IntervalPropertyHelper intervalPropertyHelper =
-        new IntervalPropertyHelper(config.getP2PServerConfig().getProperties());
+          new IntervalPropertyHelper(config.getP2PServerConfig().getProperties());
 
       final Object app =
           ServiceLoader.load(TesseraApp.class).stream()
@@ -119,8 +119,11 @@ public enum Launcher {
       recoveryServer.start();
       LOGGER.debug("Started recovery server");
 
-      final var waitTimeBeforeRecoveryStartsInMillis = intervalPropertyHelper.partyInfoInterval() * 2L;
-      LOGGER.info("Waiting for nodes to synchronise with peers for {} seconds", waitTimeBeforeRecoveryStartsInMillis / 1000L);
+      final var waitTimeBeforeRecoveryStartsInMillis =
+          intervalPropertyHelper.partyInfoInterval() * 2L;
+      LOGGER.info(
+          "Waiting for nodes to synchronise with peers for {} seconds",
+          waitTimeBeforeRecoveryStartsInMillis / 1000L);
       Thread.sleep(waitTimeBeforeRecoveryStartsInMillis);
 
       final int exitCode = Recovery.create().recover();
