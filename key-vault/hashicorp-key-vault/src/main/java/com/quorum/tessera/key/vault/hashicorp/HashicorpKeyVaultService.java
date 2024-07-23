@@ -23,9 +23,15 @@ public class HashicorpKeyVaultService implements KeyVaultService {
 
   protected static final String SECRET_ENGINE_NAME_KEY = "secretEngineName";
 
+  protected static final String TRANSIT_SECRET_ENGINE_NAME_KEY = "transitSecretEngineName";
+
+  protected static final String TRANSIT_KEY_NAME_KEY = "transitKeyName";
+
   private final VaultVersionedKeyValueTemplateFactory vaultVersionedKeyValueTemplateFactory;
 
   private final VaultOperations vaultOperations;
+
+  private final HashicorpTransitSecretEngineService hashicorpTransitSecretEngineService;
 
   HashicorpKeyVaultService(
       VaultOperations vaultOperations,
@@ -34,6 +40,8 @@ public class HashicorpKeyVaultService implements KeyVaultService {
     this.vaultOperations = vaultOperations;
     this.vaultVersionedKeyValueTemplateFactory =
         vaultVersionedKeyValueTemplateFactorySupplier.get();
+    this.hashicorpTransitSecretEngineService =
+        new HashicorpTransitSecretEngineService(this.vaultOperations);
   }
 
   @Override
@@ -63,7 +71,18 @@ public class HashicorpKeyVaultService implements KeyVaultService {
           "No value with id " + secretId + " found at " + secretEngineName + "/" + secretName);
     }
 
-    return versionedResponse.getData().get(secretId).toString();
+    var secretValue = versionedResponse.getData().get(secretId).toString();
+
+    return hashicorpTransitSecretEngineService.decryptValueIfTseRequired(
+        hashicorpGetSecretData, secretValue);
+  }
+
+  private Map.Entry<String, String> encryptValueIfTseRequired(
+      Map<String, String> hashicorpSetSecretData, Map.Entry<String, String> entry) {
+    String newValue =
+        hashicorpTransitSecretEngineService.encryptValueIfTseRequired(
+            hashicorpSetSecretData, entry.getValue());
+    return Map.entry(entry.getKey(), newValue);
   }
 
   @Override
@@ -72,13 +91,18 @@ public class HashicorpKeyVaultService implements KeyVaultService {
     String secretName = hashicorpSetSecretData.get(SECRET_NAME_KEY);
     String secretEngineName = hashicorpSetSecretData.get(SECRET_ENGINE_NAME_KEY);
 
+    final var propertyKeysToFilterOut =
+        List.of(
+            SECRET_NAME_KEY,
+            SECRET_ID_KEY,
+            SECRET_ENGINE_NAME_KEY,
+            TRANSIT_SECRET_ENGINE_NAME_KEY,
+            TRANSIT_KEY_NAME_KEY);
+
     Map<String, String> nameValuePairs =
         hashicorpSetSecretData.entrySet().stream()
-            .filter(
-                not(
-                    e ->
-                        List.of(SECRET_NAME_KEY, SECRET_ID_KEY, SECRET_ENGINE_NAME_KEY)
-                            .contains(e.getKey())))
+            .filter(not(e -> propertyKeysToFilterOut.contains(e.getKey())))
+            .map(e -> encryptValueIfTseRequired(hashicorpSetSecretData, e))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     VaultVersionedKeyValueOperations keyValueOperations =
