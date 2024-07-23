@@ -168,7 +168,9 @@ public class KeyDataUtil {
           keyData.getHashicorpVaultPrivateKeyId(),
           keyData.getHashicorpVaultSecretEngineName(),
           keyData.getHashicorpVaultSecretName(),
-          hashicorpVaultSecretVersion);
+          hashicorpVaultSecretVersion,
+          keyData.getHashicorpVaultTransitSecretEngineName(),
+          keyData.getHashicorpVaultTransitKeyName());
     }
 
     // case 5, the AWS Secrets Manager data is provided
