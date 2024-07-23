@@ -14,6 +14,10 @@ public class HashicorpVaultKeyPair implements ConfigKeyPair {
 
   @NotNull @XmlElement private String secretName;
 
+  @NotNull @XmlElement private String transitSecretEngineName;
+
+  @NotNull @XmlElement private String transitKeyName;
+
   @PositiveOrZero(message = "{ValidPositiveInteger.message}")
   @XmlElement
   private Integer secretVersion;
@@ -24,11 +28,32 @@ public class HashicorpVaultKeyPair implements ConfigKeyPair {
       String secretEngineName,
       String secretName,
       Integer secretVersion) {
+    this(
+      publicKeyId,
+      privateKeyId,
+      secretEngineName,
+      secretName,
+      secretVersion,
+      "",
+      ""
+    );
+  }
+
+  public HashicorpVaultKeyPair(
+    String publicKeyId,
+    String privateKeyId,
+    String secretEngineName,
+    String secretName,
+    Integer secretVersion,
+    String transitSecretEngineName,
+    String transitKeyName) {
     this.publicKeyId = publicKeyId;
     this.privateKeyId = privateKeyId;
     this.secretEngineName = secretEngineName;
     this.secretName = secretName;
     this.secretVersion = secretVersion;
+    this.transitSecretEngineName = transitSecretEngineName;
+    this.transitKeyName = transitKeyName;
   }
 
   public String getPublicKeyId() {
@@ -45,6 +70,14 @@ public class HashicorpVaultKeyPair implements ConfigKeyPair {
 
   public String getSecretName() {
     return secretName;
+  }
+
+  public String getTransitSecretEngineName() {
+    return transitSecretEngineName;
+  }
+
+  public String getTransitKeyName() {
+    return transitKeyName;
   }
 
   public Integer getSecretVersion() {

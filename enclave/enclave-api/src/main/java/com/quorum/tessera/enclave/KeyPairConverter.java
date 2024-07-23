@@ -67,14 +67,18 @@ public class KeyPairConverter {
               "secretEngineName", hkp.getSecretEngineName(),
               "secretName", hkp.getSecretName(),
               "secretId", hkp.getPublicKeyId(),
-              "secretVersion", Objects.toString(hkp.getSecretVersion()));
+              "secretVersion", Objects.toString(hkp.getSecretVersion()),
+              "transitSecretEngineName", hkp.getTransitSecretEngineName(),
+              "transitKeyName", hkp.getTransitKeyName());
 
       Map<String, String> getPrivateKeyData =
           Map.of(
               "secretEngineName", hkp.getSecretEngineName(),
               "secretName", hkp.getSecretName(),
               "secretId", hkp.getPrivateKeyId(),
-              "secretVersion", Objects.toString(hkp.getSecretVersion()));
+              "secretVersion", Objects.toString(hkp.getSecretVersion()),
+              "transitSecretEngineName", hkp.getTransitSecretEngineName(),
+              "transitKeyName", hkp.getTransitKeyName());
 
       base64PublicKey = keyVaultService.getSecret(getPublicKeyData);
       base64PrivateKey = keyVaultService.getSecret(getPrivateKeyData);
