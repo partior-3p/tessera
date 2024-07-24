@@ -72,49 +72,10 @@ public class KeyData extends ConfigItem {
       String hashicorpVaultSecretEngineName,
       String hashicorpVaultSecretName,
       String hashicorpVaultSecretVersion,
+      String hashicorpVaultTransitSecretEngineName,
+      String hashicorpVaultTransitKeyName,
       String awsSecretsManagerPublicKeyId,
       String awsSecretsManagerPrivateKeyId) {
-    this(
-      config,
-      privateKey,
-      publicKey,
-      privateKeyPath,
-      publicKeyPath,
-      azureVaultPublicKeyId,
-      azureVaultPrivateKeyId,
-      azureVaultPublicKeyVersion,
-      azureVaultPrivateKeyVersion,
-      hashicorpVaultPublicKeyId,
-      hashicorpVaultPrivateKeyId,
-      hashicorpVaultSecretEngineName,
-      hashicorpVaultSecretName,
-      hashicorpVaultSecretVersion,
-      "",
-      "",
-      awsSecretsManagerPublicKeyId,
-      awsSecretsManagerPrivateKeyId
-    );
-  }
-
-  public KeyData(
-    KeyDataConfig config,
-    String privateKey,
-    String publicKey,
-    Path privateKeyPath,
-    Path publicKeyPath,
-    String azureVaultPublicKeyId,
-    String azureVaultPrivateKeyId,
-    String azureVaultPublicKeyVersion,
-    String azureVaultPrivateKeyVersion,
-    String hashicorpVaultPublicKeyId,
-    String hashicorpVaultPrivateKeyId,
-    String hashicorpVaultSecretEngineName,
-    String hashicorpVaultSecretName,
-    String hashicorpVaultSecretVersion,
-    String hashicorpVaultTransitSecretEngineName,
-    String hashicorpVaultTransitKeyName,
-    String awsSecretsManagerPublicKeyId,
-    String awsSecretsManagerPrivateKeyId) {
     this.config = config;
     this.privateKey = privateKey;
     this.publicKey = publicKey;
@@ -193,9 +154,13 @@ public class KeyData extends ConfigItem {
     return hashicorpVaultSecretVersion;
   }
 
-  public String getHashicorpVaultTransitSecretEngineName() { return hashicorpVaultTransitSecretEngineName; }
+  public String getHashicorpVaultTransitSecretEngineName() {
+    return hashicorpVaultTransitSecretEngineName;
+  }
 
-  public String getHashicorpVaultTransitKeyName() { return hashicorpVaultTransitKeyName; }
+  public String getHashicorpVaultTransitKeyName() {
+    return hashicorpVaultTransitKeyName;
+  }
 
   public String getAwsSecretsManagerPublicKeyId() {
     return awsSecretsManagerPublicKeyId;
@@ -261,11 +226,12 @@ public class KeyData extends ConfigItem {
     this.hashicorpVaultSecretVersion = hashicorpVaultSecretVersion;
   }
 
-  public void setHashicorpVaultTransitSecretEngineName(String hashicorpVaultTransitSecretEngineName){
+  public void setHashicorpVaultTransitSecretEngineName(
+      String hashicorpVaultTransitSecretEngineName) {
     this.hashicorpVaultTransitSecretEngineName = hashicorpVaultTransitSecretEngineName;
   }
 
-  public void setHashicorpVaultTransitKeyName(String hashicorpVaultTransitKeyName){
+  public void setHashicorpVaultTransitKeyName(String hashicorpVaultTransitKeyName) {
     this.hashicorpVaultTransitKeyName = hashicorpVaultTransitKeyName;
   }
 
