@@ -42,6 +42,10 @@ public class UnsupportedKeyPair implements ConfigKeyPair {
 
   @XmlElement private String hashicorpVaultSecretVersion;
 
+  @XmlElement private String hashicorpVaultTransitSecretEngine;
+
+  @XmlElement private String hashicorpVaultTransitKey;
+
   @XmlElement private String awsSecretsManagerPublicKeyId;
 
   @XmlElement private String awsSecretsManagerPrivateKeyId;
@@ -61,6 +65,8 @@ public class UnsupportedKeyPair implements ConfigKeyPair {
       String hashicorpVaultSecretEngineName,
       String hashicorpVaultSecretName,
       String hashicorpVaultSecretVersion,
+      String hashicorpVaultTransitSecretEngine,
+      String hashicorpVaultTransitKey,
       String awsSecretsManagerPublicKeyId,
       String awsSecretsManagerPrivateKeyId) {
     this.config = config;
@@ -77,6 +83,8 @@ public class UnsupportedKeyPair implements ConfigKeyPair {
     this.hashicorpVaultSecretEngineName = hashicorpVaultSecretEngineName;
     this.hashicorpVaultSecretName = hashicorpVaultSecretName;
     this.hashicorpVaultSecretVersion = hashicorpVaultSecretVersion;
+    this.hashicorpVaultTransitSecretEngine = hashicorpVaultTransitSecretEngine;
+    this.hashicorpVaultTransitKey = hashicorpVaultTransitKey;
     this.awsSecretsManagerPublicKeyId = awsSecretsManagerPublicKeyId;
     this.awsSecretsManagerPrivateKeyId = awsSecretsManagerPrivateKeyId;
   }
@@ -139,6 +147,14 @@ public class UnsupportedKeyPair implements ConfigKeyPair {
 
   public String getHashicorpVaultSecretVersion() {
     return hashicorpVaultSecretVersion;
+  }
+
+  public String getHashicorpVaultTransitSecretEngine() {
+    return hashicorpVaultTransitSecretEngine;
+  }
+
+  public String getHashicorpVaultTransitKey() {
+    return hashicorpVaultTransitKey;
   }
 
   @Override
@@ -205,6 +221,14 @@ public class UnsupportedKeyPair implements ConfigKeyPair {
 
   public void setHashicorpVaultSecretVersion(String hashicorpVaultSecretVersion) {
     this.hashicorpVaultSecretVersion = hashicorpVaultSecretVersion;
+  }
+
+  public void setHashicorpVaultTransitSecretEngine(String hashicorpVaultTransitSecretEngine) {
+    this.hashicorpVaultTransitSecretEngine = hashicorpVaultTransitSecretEngine;
+  }
+
+  public void setHashicorpVaultTransitKey(String hashicorpVaultTransitKey) {
+    this.hashicorpVaultTransitKey = hashicorpVaultTransitKey;
   }
 
   public String getAwsSecretsManagerPublicKeyId() {
