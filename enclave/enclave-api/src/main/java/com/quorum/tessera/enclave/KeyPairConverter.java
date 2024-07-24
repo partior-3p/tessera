@@ -68,8 +68,8 @@ public class KeyPairConverter {
               "secretName", hkp.getSecretName(),
               "secretId", hkp.getPublicKeyId(),
               "secretVersion", Objects.toString(hkp.getSecretVersion()),
-              "transitSecretEngineName", hkp.getTransitSecretEngineName(),
-              "transitKeyName", hkp.getTransitKeyName());
+              "transitSecretEngineName", Objects.toString(hkp.getTransitSecretEngineName(), ""),
+              "transitKeyName", Objects.toString(hkp.getTransitKeyName(), ""));
 
       Map<String, String> getPrivateKeyData =
           Map.of(
@@ -77,8 +77,8 @@ public class KeyPairConverter {
               "secretName", hkp.getSecretName(),
               "secretId", hkp.getPrivateKeyId(),
               "secretVersion", Objects.toString(hkp.getSecretVersion()),
-              "transitSecretEngineName", hkp.getTransitSecretEngineName(),
-              "transitKeyName", hkp.getTransitKeyName());
+              "transitSecretEngineName", Objects.toString(hkp.getTransitSecretEngineName(), ""),
+              "transitKeyName", Objects.toString(hkp.getTransitKeyName(), ""));
 
       base64PublicKey = keyVaultService.getSecret(getPublicKeyData);
       base64PrivateKey = keyVaultService.getSecret(getPrivateKeyData);

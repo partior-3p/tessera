@@ -204,6 +204,8 @@ public class KeyDataUtil {
         keyData.getHashicorpVaultSecretEngineName(),
         keyData.getHashicorpVaultSecretName(),
         keyData.getHashicorpVaultSecretVersion(),
+        keyData.getHashicorpVaultTransitSecretEngineName(),
+        keyData.getHashicorpVaultTransitKeyName(),
         keyData.getAwsSecretsManagerPublicKeyId(),
         keyData.getAwsSecretsManagerPrivateKeyId());
   }
@@ -278,6 +280,8 @@ public class KeyDataUtil {
           kp.getHashicorpVaultSecretEngineName(),
           kp.getHashicorpVaultSecretName(),
           kp.getHashicorpVaultSecretVersion(),
+          kp.getHashicorpVaultTransitSecretEngine(),
+          kp.getHashicorpVaultTransitKey(),
           kp.getAwsSecretsManagerPublicKeyId(),
           kp.getAwsSecretsManagerPrivateKeyId());
     }
