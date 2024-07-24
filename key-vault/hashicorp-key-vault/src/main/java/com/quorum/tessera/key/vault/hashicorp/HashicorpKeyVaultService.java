@@ -91,7 +91,7 @@ public class HashicorpKeyVaultService implements KeyVaultService {
     String secretName = hashicorpSetSecretData.get(SECRET_NAME_KEY);
     String secretEngineName = hashicorpSetSecretData.get(SECRET_ENGINE_NAME_KEY);
 
-    final var propertyKeysToFilterOut =
+    final var propertiesToExcludeFromSavingToVaultSecret =
         List.of(
             SECRET_NAME_KEY,
             SECRET_ID_KEY,
@@ -101,7 +101,7 @@ public class HashicorpKeyVaultService implements KeyVaultService {
 
     Map<String, String> nameValuePairs =
         hashicorpSetSecretData.entrySet().stream()
-            .filter(not(e -> propertyKeysToFilterOut.contains(e.getKey())))
+            .filter(not(e -> propertiesToExcludeFromSavingToVaultSecret.contains(e.getKey())))
             .map(e -> encryptValueIfTseRequired(hashicorpSetSecretData, e))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
