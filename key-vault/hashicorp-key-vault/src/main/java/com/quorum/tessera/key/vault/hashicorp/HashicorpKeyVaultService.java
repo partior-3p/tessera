@@ -7,6 +7,7 @@ import com.quorum.tessera.key.vault.SetSecretResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.springframework.vault.core.VaultOperations;
@@ -35,13 +36,24 @@ public class HashicorpKeyVaultService implements KeyVaultService {
 
   HashicorpKeyVaultService(
       VaultOperations vaultOperations,
-      Supplier<VaultVersionedKeyValueTemplateFactory>
-          vaultVersionedKeyValueTemplateFactorySupplier) {
+      Supplier<VaultVersionedKeyValueTemplateFactory> vaultVersionedKeyValueTemplateFactorySupplier,
+      Function<VaultOperations, HashicorpTransitSecretEngineService>
+          hashicorpTransitSecretEngineServiceProvider) {
     this.vaultOperations = vaultOperations;
     this.vaultVersionedKeyValueTemplateFactory =
         vaultVersionedKeyValueTemplateFactorySupplier.get();
     this.hashicorpTransitSecretEngineService =
-        new HashicorpTransitSecretEngineService(this.vaultOperations);
+        hashicorpTransitSecretEngineServiceProvider.apply(this.vaultOperations);
+  }
+
+  HashicorpKeyVaultService(
+      VaultOperations vaultOperations,
+      Supplier<VaultVersionedKeyValueTemplateFactory>
+          vaultVersionedKeyValueTemplateFactorySupplier) {
+    this(
+        vaultOperations,
+        vaultVersionedKeyValueTemplateFactorySupplier,
+        HashicorpTransitSecretEngineService::new);
   }
 
   @Override
