@@ -1,5 +1,6 @@
 package com.quorum.tessera.key.vault.hashicorp;
 
+import java.util.ArrayList;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,25 +17,29 @@ class HashicorpTransitSecretEngineService {
     this.vaultOperations = vaultOperations;
   }
 
-  private VaultTransitTemplate createVaultTransitTemplate(String transitSecretEngineName) {
+  VaultTransitTemplate createVaultTransitTemplate(String transitSecretEngineName) {
     return new VaultTransitTemplate(vaultOperations, transitSecretEngineName);
   }
 
   private boolean validateIfValueIsTobeDecryptedByTse(
       String transitSecretEngineName, String transitKeyName, String value) {
+    var missingPropertiesList = new ArrayList<String>();
+
     if (value != null && value.startsWith("vault:v")) {
       if (transitSecretEngineName == null || transitSecretEngineName.isEmpty()) {
-        throw new HashicorpVaultException(
-            "Value needs to be decrypted, but \""
-                + HashicorpKeyVaultService.TRANSIT_SECRET_ENGINE_NAME_KEY
-                + "\" property is not provided");
+        missingPropertiesList.add(HashicorpKeyVaultService.TRANSIT_SECRET_ENGINE_NAME_KEY);
       }
       if (transitKeyName == null || transitKeyName.isEmpty()) {
-        throw new HashicorpVaultException(
-            "Value needs to be decrypted, but \""
-                + HashicorpKeyVaultService.TRANSIT_KEY_NAME_KEY
-                + "\" property is not provided");
+        missingPropertiesList.add(HashicorpKeyVaultService.TRANSIT_KEY_NAME_KEY);
       }
+
+      if (!missingPropertiesList.isEmpty()) {
+        throw new HashicorpVaultException(
+            "Vault key value needs to be decrypted, but the following configuration was/were not provided: [ "
+                + String.join(", ", missingPropertiesList)
+                + " ]");
+      }
+
       return true;
     }
     return false;
