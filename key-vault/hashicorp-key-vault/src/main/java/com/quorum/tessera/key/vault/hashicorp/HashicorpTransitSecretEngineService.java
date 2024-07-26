@@ -47,15 +47,12 @@ class HashicorpTransitSecretEngineService {
 
   private boolean validateIfValueNeedsToBeEncryptedByTse(
       String transitSecretEngineName, String transitKeyName, String value) {
-    if (transitSecretEngineName != null
+    return transitSecretEngineName != null
         && !transitSecretEngineName.isEmpty()
         && transitKeyName != null
         && !transitKeyName.isEmpty()
         && value != null
-        && !value.isEmpty()) {
-      return true;
-    }
-    return false;
+        && !value.isEmpty();
   }
 
   String decryptValueIfTseRequired(Map<String, String> hashicorpGetSecretData, String value) {
