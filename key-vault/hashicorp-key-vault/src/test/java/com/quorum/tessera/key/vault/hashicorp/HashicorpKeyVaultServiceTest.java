@@ -217,7 +217,7 @@ public class HashicorpKeyVaultServiceTest {
 
   @Test
   public void
-      givenTransitSecretEngineConfigurationAreAvailable_andKVDataWasEncryptedByTSE_thenKVDataAreDecryptedByTSEFirstBeforeReturningIt() {
+      givenTransitSecretEngineConfigurationAreAvailableAndKVDataWasEncryptedByTseThenKVDataAreDecryptedByTseFirstBeforeReturningIt() {
     String encryptedKeyValue = "vault:v1:encrypted value";
     String decryptedKeyValue = "decrypted data";
 
@@ -270,7 +270,7 @@ public class HashicorpKeyVaultServiceTest {
 
   @Test
   public void
-      givenKVDataWasEncryptedByTSE_butTransitSecretEngineConfigurationAreMissing_thenShouldThrowHashicorpVaultException() {
+      givenKVDataWasEncryptedByTseButTransitSecretEngineConfigurationAreMissingThenShouldThrowHashicorpVaultException() {
     String encryptedKeyValue = "vault:v1:encrypted value";
     String decryptedKeyValue = "decrypted data";
 
@@ -325,7 +325,7 @@ public class HashicorpKeyVaultServiceTest {
 
   @Test
   public void
-      givenTransitSecretEngineConfigurationAreAvailable_thenPrivateAndPublicKeyShouldBeTSEEncryptedBeforeStoredInKV() {
+      givenTransitSecretEngineConfigurationAreAvailableThenPrivateAndPublicKeyShouldBeTseEncryptedBeforeStoredInKV() {
     String plainTextPublicKey = "plain text public key";
     String plainTextPrivateKey = "plain text private key";
     String encryptedPublicKey = "encrypted public key";
@@ -397,7 +397,7 @@ public class HashicorpKeyVaultServiceTest {
 
   @Test
   public void
-      givenTransitSecretEngineConfigurationAreMissing_thenPrivateAndPublicKeyShouldBeStoredInKVWithoutTSEEncyption() {
+      givenTransitSecretEngineConfigurationAreMissingThenPrivateAndPublicKeyShouldBeStoredInKvWithoutTseEncyption() {
     String plainTextPublicKey = "plain text public key";
     String plainTextPrivateKey = "plain text private key";
     String encryptedPublicKey = "encrypted public key";
