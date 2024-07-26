@@ -44,11 +44,17 @@ public class HashicorpStepDefs implements En {
 
   private final String secretEngineName = "kv";
 
+  private final String transitSecretEngineName = "transit";
+
+  private final String transitKeyName = "tessera-tse-key";
+
   private String approleRoleId;
 
   private String approleSecretId;
 
   private Path tempTesseraConfig;
+
+  private Path tempTesseraWithTseConfig;
 
   private final AtomicReference<Process> tesseraProcess = new AtomicReference<>();
 
@@ -62,6 +68,7 @@ public class HashicorpStepDefs implements En {
           // "/Users/yourname/jpmc-tessera/tessera-app/target/tessera-app-0.11-SNAPSHOT-app.jar");
 
           tempTesseraConfig = null;
+          tempTesseraWithTseConfig = null;
         });
 
     Given(
@@ -223,6 +230,62 @@ public class HashicorpStepDefs implements En {
         });
 
     Given(
+        "the vault has a transit secret engine",
+        () -> {
+          setKeyStoreProperties();
+
+          // Create new v2 kv secret engine
+          final String mountPath = String.format("v1/sys/mounts/%s", transitSecretEngineName);
+          final URL createSecretEngineUrl =
+              UriBuilder.fromUri("https://localhost:8200").path(mountPath).build().toURL();
+          HttpsURLConnection createSecretEngineUrlConnection =
+              (HttpsURLConnection) createSecretEngineUrl.openConnection();
+
+          createSecretEngineUrlConnection.setDoOutput(true);
+          createSecretEngineUrlConnection.setRequestMethod("POST");
+          createSecretEngineUrlConnection.setRequestProperty("X-Vault-Token", vaultToken);
+
+          final String createSecretEngineData = "{\"type\": \"transit\"}";
+
+          try (OutputStreamWriter writer =
+              new OutputStreamWriter(createSecretEngineUrlConnection.getOutputStream())) {
+            writer.write(createSecretEngineData);
+          }
+
+          createSecretEngineUrlConnection.connect();
+          assertThat(createSecretEngineUrlConnection.getResponseCode())
+              .isEqualTo(HttpsURLConnection.HTTP_NO_CONTENT);
+        });
+
+    Given(
+        "the vault has transit secret key",
+        () -> {
+          setKeyStoreProperties();
+
+          // Create new v2 kv secret engine
+          final String transitKeyPath = "v1/transit/keys/" + transitKeyName;
+          final URL createSecretEngineUrl =
+              UriBuilder.fromUri("https://localhost:8200").path(transitKeyPath).build().toURL();
+          HttpsURLConnection createSecretEngineUrlConnection =
+              (HttpsURLConnection) createSecretEngineUrl.openConnection();
+
+          createSecretEngineUrlConnection.setDoOutput(true);
+          createSecretEngineUrlConnection.setRequestMethod("POST");
+          createSecretEngineUrlConnection.setRequestProperty("X-Vault-Token", vaultToken);
+
+          final String keyType = "{\"type\": \"aes256-gcm96\"}";
+
+          try (OutputStreamWriter writer =
+              new OutputStreamWriter(createSecretEngineUrlConnection.getOutputStream())) {
+            writer.write(keyType);
+          }
+
+          createSecretEngineUrlConnection.connect();
+          assertThat(createSecretEngineUrlConnection.getResponseCode())
+              .isEqualTo(HttpsURLConnection.HTTP_NO_CONTENT);
+        });
+
+    Given(
         "^the AppRole auth method is enabled at (?:the|a) (default|custom) path$",
         (String approleType) -> {
           setKeyStoreProperties();
@@ -274,7 +337,14 @@ public class HashicorpStepDefs implements En {
 
           final String createPolicyData =
               String.format(
-                  "{ \"policy\": \"path \\\"%s/data/tessera*\\\" { capabilities = [\\\"create\\\", \\\"update\\\", \\\"read\\\"]}\" }",
+                  "{ \"policy\": \"path \\\"%s/data/tessera*\\\" { capabilities = [\\\"create\\\", \\\"update\\\", \\\"read\\\"]}\\n"
+                      + "path \\\"transit/encrypt/"
+                      + transitKeyName
+                      + "\\\" { capabilities = [\\\"create\\\", \\\"update\\\"]}\\n"
+                      + "path \\\"transit/decrypt/"
+                      + transitKeyName
+                      + "\\\" { capabilities = [\\\"create\\\", \\\"update\\\"]}\\n"
+                      + "\" }",
                   secretEngineName);
 
           try (OutputStreamWriter writer =
@@ -407,6 +477,64 @@ public class HashicorpStepDefs implements En {
         });
 
     Given(
+        "the vault contains a key pair encrypted by TSE",
+        () -> {
+          Objects.requireNonNull(vaultToken);
+
+          setKeyStoreProperties();
+
+          // Set secret data
+          final String setPath = String.format("v1/%s/data/tessera", secretEngineName);
+          final URL setSecretUrl =
+              UriBuilder.fromUri("https://localhost:8200").path(setPath).build().toURL();
+          HttpsURLConnection setSecretUrlConnection =
+              (HttpsURLConnection) setSecretUrl.openConnection();
+
+          setSecretUrlConnection.setDoOutput(true);
+          setSecretUrlConnection.setRequestMethod("POST");
+          setSecretUrlConnection.setRequestProperty("X-Vault-Token", vaultToken);
+
+          final String encryptedPublicKey =
+              getTSEEncryptedValue("/+UuD63zItL1EbjxkKUljMgG8Z1w0AJ8pNOR4iq2yQc=");
+          final String encryptedPrivateKey =
+              getTSEEncryptedValue("yAWAJjwPqUtNVlqGjSrBmr1/iIkghuOh1803Yzx9jLM=");
+
+          String setSecretData =
+              "{\"data\": {\"publicKey\": \""
+                  + encryptedPublicKey
+                  + "\", \"privateKey\": \""
+                  + encryptedPrivateKey
+                  + "\"}}";
+
+          try (OutputStreamWriter writer =
+              new OutputStreamWriter(setSecretUrlConnection.getOutputStream())) {
+            writer.write(setSecretData);
+          }
+
+          setSecretUrlConnection.connect();
+          assertThat(setSecretUrlConnection.getResponseCode())
+              .isEqualTo(HttpsURLConnection.HTTP_OK);
+
+          final String getPath = String.format("v1/%s/data/tessera", secretEngineName);
+          final URL getSecretUrl =
+              UriBuilder.fromUri("https://localhost:8200").path(getPath).build().toURL();
+          HttpsURLConnection getSecretUrlConnection =
+              (HttpsURLConnection) getSecretUrl.openConnection();
+          getSecretUrlConnection.setRequestProperty("X-Vault-Token", vaultToken);
+
+          getSecretUrlConnection.connect();
+          assertThat(getSecretUrlConnection.getResponseCode())
+              .isEqualTo(HttpsURLConnection.HTTP_OK);
+
+          JsonReader jsonReader = Json.createReader(getSecretUrlConnection.getInputStream());
+
+          JsonObject getSecretObject = jsonReader.readObject();
+          JsonObject keyDataObject = getSecretObject.getJsonObject("data").getJsonObject("data");
+          assertThat(keyDataObject.getString("publicKey")).isEqualTo(encryptedPublicKey);
+          assertThat(keyDataObject.getString("privateKey")).isEqualTo(encryptedPrivateKey);
+        });
+
+    Given(
         "^the configfile contains the correct vault configuration(| and custom approle configuration)",
         (String isCustomApprole) -> {
           createTempTesseraConfig();
@@ -425,6 +553,30 @@ public class HashicorpStepDefs implements En {
 
           assertThat(config.getKeys().getHashicorpKeyVaultConfig())
               .isEqualToComparingFieldByField(expectedVaultConfig);
+        });
+
+    Given(
+        "^the configfile contains the correct vault and TSE configuration",
+        () -> {
+          var originalTempTesseraConfig = tempTesseraConfig;
+          try {
+            createTempTesseraConfigWithApproleAndWithTSE();
+
+            final Config config =
+                JaxbUtil.unmarshal(Files.newInputStream(tempTesseraConfig), Config.class);
+
+            HashicorpKeyVaultConfig expectedVaultConfig = new HashicorpKeyVaultConfig();
+            expectedVaultConfig.setUrl("https://localhost:8200");
+            expectedVaultConfig.setTlsKeyStorePath(Paths.get(getClientTlsKeystore()));
+            expectedVaultConfig.setTlsTrustStorePath(Paths.get(getClientTlsTruststore()));
+
+            assertThat(config.getKeys().getHashicorpKeyVaultConfig())
+                .isEqualToComparingFieldByField(expectedVaultConfig);
+          } catch (Exception ex) {
+            throw ex;
+          } finally {
+            tempTesseraConfig = originalTempTesseraConfig;
+          }
         });
 
     Given(
@@ -472,6 +624,43 @@ public class HashicorpStepDefs implements En {
           jvmArgs.add("-Ddebug=true");
 
           startTessera(args, jvmArgs, tempTesseraConfig, authMethod);
+        });
+
+    When(
+        "^Tessera is started with the following CLI args, configuration with TSE and (token|approle) environment variables*$",
+        (String authMethod, String cliArgs) -> {
+          final URL logbackConfigFile = NodeExecManager.class.getResource("/logback-node.xml");
+          Path pid = Paths.get(System.getProperty("java.io.tmpdir"), "pidA.pid");
+
+          String formattedArgs =
+              String.format(
+                  cliArgs, tempTesseraWithTseConfig.toString(), pid.toAbsolutePath().toString());
+
+          Path startScript =
+              Optional.of("keyvault.hashicorp.dist").map(System::getProperty).map(Paths::get).get();
+
+          final Path distDirectory =
+              Optional.of("keyvault.hashicorp.dist")
+                  .map(System::getProperty)
+                  .map(Paths::get)
+                  .get()
+                  .resolve("*");
+
+          final List<String> args =
+              new ExecArgsBuilder()
+                  .withStartScript(startScript)
+                  .withClassPathItem(distDirectory)
+                  .withArg("--debug")
+                  .build();
+
+          args.addAll(Arrays.asList(formattedArgs.split(" ")));
+
+          List<String> jvmArgs = new ArrayList<>();
+          jvmArgs.add("-Dspring.profiles.active=disable-unixsocket");
+          jvmArgs.add("-Dlogback.configurationFile=" + logbackConfigFile.getFile());
+          jvmArgs.add("-Ddebug=true");
+
+          startTessera(args, jvmArgs, tempTesseraWithTseConfig, authMethod);
         });
 
     When(
@@ -606,6 +795,48 @@ public class HashicorpStepDefs implements En {
               getClass().getResource("/vault/tessera-hashicorp-approle-config.json"), params);
       tempTesseraConfig.toFile().deleteOnExit();
     }
+  }
+
+  private void createTempTesseraConfigWithApproleAndWithTSE() {
+    if (tempTesseraWithTseConfig == null) {
+      Map<String, Object> params = new HashMap<>();
+      params.put("clientKeystore", getClientTlsKeystore());
+      params.put("clientTruststore", getClientTlsTruststore());
+
+      tempTesseraWithTseConfig =
+          ElUtil.createTempFileFromTemplate(
+              getClass().getResource("/vault/tessera-hashicorp-approle-with-tse-config.json"),
+              params);
+      tempTesseraWithTseConfig.toFile().deleteOnExit();
+      LOGGER.info("Temporary file with TSE created: {}", tempTesseraWithTseConfig.getFileName());
+    }
+  }
+
+  private String getTSEEncryptedValue(String value) throws IOException {
+    final String mountPath = "v1/transit/encrypt/" + transitKeyName;
+    final URL createSecretEngineUrl =
+        UriBuilder.fromUri("https://localhost:8200").path(mountPath).build().toURL();
+    HttpsURLConnection tseUrlConnection =
+        (HttpsURLConnection) createSecretEngineUrl.openConnection();
+
+    tseUrlConnection.setDoOutput(true);
+    tseUrlConnection.setRequestMethod("POST");
+    tseUrlConnection.setRequestProperty("X-Vault-Token", vaultToken);
+
+    final String encodedBase64Value = Base64.getEncoder().encodeToString(value.getBytes());
+    final String createSecretEngineData = "{\"plaintext\": \"" + encodedBase64Value + "\"}";
+
+    try (OutputStreamWriter writer = new OutputStreamWriter(tseUrlConnection.getOutputStream())) {
+      writer.write(createSecretEngineData);
+    }
+
+    tseUrlConnection.connect();
+    assertThat(tseUrlConnection.getResponseCode()).isEqualTo(HttpsURLConnection.HTTP_OK);
+
+    JsonReader jsonReader = Json.createReader(tseUrlConnection.getInputStream());
+    JsonObject getTseResponseObject = jsonReader.readObject();
+    JsonObject cipherTextObject = getTseResponseObject.getJsonObject("data");
+    return cipherTextObject.getString("ciphertext");
   }
 
   private String getServerTlsCert() {
