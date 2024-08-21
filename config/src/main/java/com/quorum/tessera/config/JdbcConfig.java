@@ -22,8 +22,14 @@ public class JdbcConfig extends ConfigItem {
 
   @XmlElement private int fetchSize;
 
-  public JdbcConfig(String username, String password, String url) {
-    this.username = username;
+  @XmlElement
+  private HashicorpVaultDbCredentialsConfig hashicorpVaultDbCredentialsConfig;
+
+  public JdbcConfig(
+      String username,
+      String password,
+      String url) {
+        this.username = username;
     this.password = password;
     this.url = url;
   }
@@ -62,6 +68,15 @@ public class JdbcConfig extends ConfigItem {
 
   public void setAutoCreateTables(boolean autoCreateTables) {
     this.autoCreateTables = autoCreateTables;
+  }
+
+  public HashicorpVaultDbCredentialsConfig getHashicorpVaultDbCredentialsConfig() {
+    return hashicorpVaultDbCredentialsConfig;
+  }
+
+  public void setHashicorpVaultDbCredentialsConfig(
+    HashicorpVaultDbCredentialsConfig hashicorpVaultDbCredentialsConfig) {
+    this.hashicorpVaultDbCredentialsConfig = hashicorpVaultDbCredentialsConfig;
   }
 
   public int getFetchSize() {
