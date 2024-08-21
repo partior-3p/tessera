@@ -10,4 +10,6 @@ module tessera.keyvault.hashicorp {
 
   provides com.quorum.tessera.key.vault.KeyVaultServiceFactory with
       com.quorum.tessera.key.vault.hashicorp.HashicorpKeyVaultServiceFactory;
+  provides com.quorum.tessera.key.vault.DbCredentialsVaultServiceFactory with
+      com.quorum.tessera.key.vault.hashicorp.HashicorpDbCredentialsVaultServiceFactory;
 }

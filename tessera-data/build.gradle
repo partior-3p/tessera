@@ -9,6 +9,7 @@ dependencies {
   implementation project(":enclave:enclave-api")
   implementation project(":encryption:encryption-api")
   implementation project(":eclipselink-utils")
+  implementation project(":key-vault:key-vault-api")
   implementation "jakarta.transaction:jakarta.transaction-api"
   implementation "org.bouncycastle:bcprov-jdk18on"
   implementation "jakarta.validation:jakarta.validation-api"
