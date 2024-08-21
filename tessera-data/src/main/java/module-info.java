@@ -12,6 +12,7 @@ open module tessera.data {
   requires com.zaxxer.hikari;
   requires jakarta.validation;
   requires tessera.eclipselink.utils;
+  requires tessera.keyvault.api;
 
   //    opens com.quorum.tessera.data to org.eclipse.persistence.core;
   //    opens com.quorum.tessera.data.staging to org.eclipse.persistence.core;
@@ -25,6 +26,7 @@ open module tessera.data {
   uses com.quorum.tessera.data.staging.StagingEntityDAO;
   uses com.quorum.tessera.data.DataSourceFactory;
   uses com.quorum.tessera.data.PrivacyGroupDAO;
+  uses com.quorum.tessera.key.vault.DbCredentialsVaultServiceFactory;
 
   provides com.quorum.tessera.data.EncryptedTransactionDAO with
       com.quorum.tessera.data.internal.EncryptedTransactionDAOProvider;
