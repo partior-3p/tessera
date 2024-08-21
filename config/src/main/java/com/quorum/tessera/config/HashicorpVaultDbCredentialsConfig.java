@@ -25,6 +25,8 @@ public class HashicorpVaultDbCredentialsConfig extends ConfigItem {
 
   @Valid @NotNull @XmlElement private String vaultDbRole;
 
+  @Valid @XmlElement private String credentialType;
+
   @Valid
   @ValidPath(checkExists = true, message = "File does not exist")
   @XmlElement(type = String.class)
@@ -122,6 +124,14 @@ public class HashicorpVaultDbCredentialsConfig extends ConfigItem {
     return KeyVaultType.HASHICORP;
   }
 
+  public String getCredentialType() {
+    return credentialType;
+  }
+
+  public void setCredentialType(String credentialType) {
+    this.credentialType = credentialType;
+  }
+
   public DefaultKeyVaultConfig toKeyVaultConfig(){
     DefaultKeyVaultConfig config = new DefaultKeyVaultConfig();
     config.setKeyVaultType(this.getKeyVaultType());
@@ -129,6 +139,7 @@ public class HashicorpVaultDbCredentialsConfig extends ConfigItem {
     config.setProperty("approlePath", this.getApprolePath());
     config.setProperty("dbSecretEngineName", this.getDbSecretEngineName());
     config.setProperty("vaultDbRole", this.getVaultDbRole());
+    config.setProperty("credentialType", this.getCredentialType());
 
     Optional.ofNullable(this.getTlsKeyStorePath())
       .map(Objects::toString)
