@@ -4,10 +4,9 @@ import com.quorum.tessera.config.ConfigException;
 import com.quorum.tessera.config.KeyVaultConfig;
 import com.quorum.tessera.key.vault.DbCredentials;
 import com.quorum.tessera.key.vault.DbCredentialsVaultService;
+import java.util.Map;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
-
-import java.util.Map;
 
 public class HashicorpDbCredentialsVaultService implements DbCredentialsVaultService {
 
@@ -53,8 +52,8 @@ public class HashicorpDbCredentialsVaultService implements DbCredentialsVaultSer
           vaultOperations.read(
               String.format("%s/%s/%s", dbSecretEngineName, credentialPath, vaultDbRole));
     } catch (Exception ex) {
-      throw new RuntimeException(
-          "Unexpected error reading db credentials from hashicorp vault", ex);
+      throw new ConfigException(
+          new RuntimeException("Unexpected error reading db credentials from hashicorp vault", ex));
     }
 
     if (response != null) {
