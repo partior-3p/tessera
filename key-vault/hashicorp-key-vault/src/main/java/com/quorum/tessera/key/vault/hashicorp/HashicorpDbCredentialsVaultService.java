@@ -19,27 +19,32 @@ public class HashicorpDbCredentialsVaultService implements DbCredentialsVaultSer
 
   private String credentialPath = "static-creds";
 
-  HashicorpDbCredentialsVaultService(VaultOperations vaultOperations, KeyVaultConfig keyVaultConfig) {
+  HashicorpDbCredentialsVaultService(
+      VaultOperations vaultOperations, KeyVaultConfig keyVaultConfig) {
 
-    if (!keyVaultConfig.hasProperty("vaultDbRole") || keyVaultConfig.getProperty("vaultDbRole").isEmpty()){
-      throw new HashicorpVaultException("[vaultDbRole] missing in the configuration. [vaultDbRole] should be defined in configuration property: jdbc.hashicorpVaultDbCredentialsConfig");
+    if (!keyVaultConfig.hasProperty("vaultDbRole")
+        || keyVaultConfig.getProperty("vaultDbRole").isEmpty()) {
+      throw new HashicorpVaultException(
+          "[vaultDbRole] missing in the configuration. [vaultDbRole] should be defined in configuration property: jdbc.hashicorpVaultDbCredentialsConfig");
     }
 
     this.vaultOperations = vaultOperations;
     this.keyVaultConfig = keyVaultConfig;
     this.vaultDbRole = keyVaultConfig.getProperty("vaultDbRole").get();
 
-    if (keyVaultConfig.hasProperty("dbSecretEngineName") && keyVaultConfig.getProperty("dbSecretEngineName").isPresent()){
+    if (keyVaultConfig.hasProperty("dbSecretEngineName")
+        && keyVaultConfig.getProperty("dbSecretEngineName").isPresent()) {
       this.dbSecretEngineName = keyVaultConfig.getProperty("dbSecretEngineName").get();
     }
 
-    if (keyVaultConfig.hasProperty("credentialType") && keyVaultConfig.getProperty("credentialType").isPresent()){
+    if (keyVaultConfig.hasProperty("credentialType")
+        && keyVaultConfig.getProperty("credentialType").isPresent()) {
       this.credentialType = keyVaultConfig.getProperty("credentialType").get();
     }
 
-    if ("dynamic".equals(this.credentialType)){
+    if ("dynamic".equals(this.credentialType)) {
       this.credentialPath = "creds";
-    }else{
+    } else {
       this.credentialPath = "static-creds";
     }
   }
