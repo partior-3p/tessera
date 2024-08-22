@@ -132,7 +132,7 @@ public class HashicorpVaultDbCredentialsConfig extends ConfigItem {
     this.credentialType = credentialType;
   }
 
-  public DefaultKeyVaultConfig toKeyVaultConfig(){
+  public DefaultKeyVaultConfig toKeyVaultConfig() {
     DefaultKeyVaultConfig config = new DefaultKeyVaultConfig();
     config.setKeyVaultType(this.getKeyVaultType());
     config.setProperty("url", this.getUrl());
@@ -142,18 +142,18 @@ public class HashicorpVaultDbCredentialsConfig extends ConfigItem {
     config.setProperty("credentialType", this.getCredentialType());
 
     Optional.ofNullable(this.getTlsKeyStorePath())
-      .map(Objects::toString)
-      .ifPresent(
-        v -> {
-          config.setProperty("tlsKeyStorePath", v);
-        });
+        .map(Objects::toString)
+        .ifPresent(
+            v -> {
+              config.setProperty("tlsKeyStorePath", v);
+            });
 
     Optional.ofNullable(this.getTlsTrustStorePath())
-      .map(Objects::toString)
-      .ifPresent(
-        v -> {
-          config.setProperty("tlsTrustStorePath", v);
-        });
+        .map(Objects::toString)
+        .ifPresent(
+            v -> {
+              config.setProperty("tlsTrustStorePath", v);
+            });
 
     return config;
   }

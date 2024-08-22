@@ -22,14 +22,10 @@ public class JdbcConfig extends ConfigItem {
 
   @XmlElement private int fetchSize;
 
-  @XmlElement
-  private HashicorpVaultDbCredentialsConfig hashicorpVaultDbCredentialsConfig;
+  @XmlElement private HashicorpVaultDbCredentialsConfig hashicorpVaultDbCredentialsConfig;
 
-  public JdbcConfig(
-      String username,
-      String password,
-      String url) {
-        this.username = username;
+  public JdbcConfig(String username, String password, String url) {
+    this.username = username;
     this.password = password;
     this.url = url;
   }
@@ -75,7 +71,7 @@ public class JdbcConfig extends ConfigItem {
   }
 
   public void setHashicorpVaultDbCredentialsConfig(
-    HashicorpVaultDbCredentialsConfig hashicorpVaultDbCredentialsConfig) {
+      HashicorpVaultDbCredentialsConfig hashicorpVaultDbCredentialsConfig) {
     this.hashicorpVaultDbCredentialsConfig = hashicorpVaultDbCredentialsConfig;
   }
 

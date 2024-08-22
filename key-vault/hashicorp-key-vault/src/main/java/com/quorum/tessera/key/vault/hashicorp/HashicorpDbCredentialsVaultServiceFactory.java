@@ -11,7 +11,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -73,7 +72,8 @@ public class HashicorpDbCredentialsVaultServiceFactory implements DbCredentialsV
               + " environment variables to authenticate with Hashicorp Vault using the AppRole method has been set");
     }
 
-    KeyVaultConfig keyVaultConfig = config.getJdbcConfig().getHashicorpVaultDbCredentialsConfig().toKeyVaultConfig();
+    KeyVaultConfig keyVaultConfig =
+        config.getJdbcConfig().getHashicorpVaultDbCredentialsConfig().toKeyVaultConfig();
     VaultEndpoint vaultEndpoint;
 
     try {
