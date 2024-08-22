@@ -140,6 +140,7 @@ public class HashicorpVaultDbCredentialsConfig extends ConfigItem {
     config.setProperty("dbSecretEngineName", this.getDbSecretEngineName());
     config.setProperty("vaultDbRole", this.getVaultDbRole());
     config.setProperty("credentialType", this.getCredentialType());
+    config.setProperty("namespace", this.getNamespace());
 
     Optional.ofNullable(this.getTlsKeyStorePath())
         .map(Objects::toString)
