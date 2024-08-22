@@ -11,7 +11,6 @@ import com.quorum.tessera.key.vault.DbCredentials;
 import com.quorum.tessera.key.vault.DbCredentialsVaultServiceFactory;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-
 import javax.sql.DataSource;
 
 public enum HikariDataSourceFactory implements DataSourceFactory {
@@ -21,7 +20,7 @@ public enum HikariDataSourceFactory implements DataSourceFactory {
 
   private final Config rootConfig;
 
-  HikariDataSourceFactory(){
+  HikariDataSourceFactory() {
     this.rootConfig = ConfigFactory.create().getConfig();
   }
 
@@ -38,22 +37,34 @@ public enum HikariDataSourceFactory implements DataSourceFactory {
 
     if (isDbCredentialsVaultConfigPresent()) {
       final var dbCredentialsVaultService =
-        DbCredentialsVaultServiceFactory.getInstance(KeyVaultType.HASHICORP).create(rootConfig, new EnvironmentVariableProvider());
+          DbCredentialsVaultServiceFactory.getInstance(KeyVaultType.HASHICORP)
+              .create(rootConfig, new EnvironmentVariableProvider());
       final DbCredentials dbCredentials = dbCredentialsVaultService.getDbCredentials();
+
       hikariConfig.setUsername(dbCredentials.getUsername());
       hikariConfig.setPassword(dbCredentials.getPassword());
+      var hikariDataSource = new HikariDataSource(hikariConfig);
+
+      final var dbCredentialsVaultLifecycleManager =
+          new DbCredentialsVaultLifecycleManager(
+              dbCredentialsVaultService, config, hikariDataSource);
+      dbCredentialsVaultLifecycleManager.start(dbCredentials.getLeaseDurationInSec());
+      dataSource = hikariDataSource;
+
     } else {
       hikariConfig.setUsername(config.getUsername());
       hikariConfig.setPassword(resolver.resolve(config.getPassword()));
+      dataSource = new HikariDataSource(hikariConfig);
     }
 
-    dataSource = new HikariDataSource(hikariConfig);
     return dataSource;
   }
 
-  private boolean isDbCredentialsVaultConfigPresent(){
-    var hashicorpVaultDbCredentialsConfig = this.rootConfig.getJdbcConfig().getHashicorpVaultDbCredentialsConfig();
-    return hashicorpVaultDbCredentialsConfig != null && hashicorpVaultDbCredentialsConfig.getKeyVaultType()==KeyVaultType.HASHICORP;
+  private boolean isDbCredentialsVaultConfigPresent() {
+    var hashicorpVaultDbCredentialsConfig =
+        this.rootConfig.getJdbcConfig().getHashicorpVaultDbCredentialsConfig();
+    return hashicorpVaultDbCredentialsConfig != null
+        && hashicorpVaultDbCredentialsConfig.getKeyVaultType() == KeyVaultType.HASHICORP;
   }
 
   protected void clear() {
