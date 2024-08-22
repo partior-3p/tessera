@@ -4,9 +4,10 @@ import com.quorum.tessera.config.ConfigException;
 import com.quorum.tessera.config.KeyVaultConfig;
 import com.quorum.tessera.key.vault.DbCredentials;
 import com.quorum.tessera.key.vault.DbCredentialsVaultService;
-import java.util.Map;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
+
+import java.util.Map;
 
 public class HashicorpDbCredentialsVaultService implements DbCredentialsVaultService {
 
@@ -21,12 +22,6 @@ public class HashicorpDbCredentialsVaultService implements DbCredentialsVaultSer
 
   HashicorpDbCredentialsVaultService(
       VaultOperations vaultOperations, KeyVaultConfig keyVaultConfig) {
-
-    if (!keyVaultConfig.hasProperty("vaultDbRole")
-        || keyVaultConfig.getProperty("vaultDbRole").isEmpty()) {
-      throw new HashicorpVaultException(
-          "[vaultDbRole] missing in the configuration. [vaultDbRole] should be defined in configuration property: jdbc.hashicorpVaultDbCredentialsConfig");
-    }
 
     this.vaultOperations = vaultOperations;
     this.keyVaultConfig = keyVaultConfig;
