@@ -25,7 +25,7 @@ public class DbCredentialsVaultLifecycleManager {
   private int maxRetryDelayInSeconds = 60;
   private int retryCount = 0;
 
-  private final long minDelayBeforeNextRunFactor = 10;
+  private final long minDelayBeforeNextRunInSeconds = 10;
   private final double delayBeforeNextRunFactor = 0.1;
   private final long maxDurationBeforeTtlExpireInSeconds = 300;
 
@@ -34,7 +34,7 @@ public class DbCredentialsVaultLifecycleManager {
     durationBeforeTtlExpire =
         Math.min(durationBeforeTtlExpire, maxDurationBeforeTtlExpireInSeconds);
     var delayBeforeNextRunInSeconds = ttlInSeconds - durationBeforeTtlExpire;
-    return Math.max(delayBeforeNextRunInSeconds, minDelayBeforeNextRunFactor);
+    return Math.max(delayBeforeNextRunInSeconds, minDelayBeforeNextRunInSeconds);
   }
 
   private long getRetryDelayInSeconds() {
