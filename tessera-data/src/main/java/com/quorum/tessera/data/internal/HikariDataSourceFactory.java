@@ -1,6 +1,5 @@
 package com.quorum.tessera.data.internal;
 
-import com.quorum.tessera.config.Config;
 import com.quorum.tessera.config.ConfigFactory;
 import com.quorum.tessera.config.JdbcConfig;
 import com.quorum.tessera.config.KeyVaultType;
@@ -18,12 +17,6 @@ public enum HikariDataSourceFactory implements DataSourceFactory {
 
   private DataSource dataSource;
 
-  private final Config rootConfig;
-
-  HikariDataSourceFactory() {
-    this.rootConfig = ConfigFactory.create().getConfig();
-  }
-
   @Override
   public DataSource create(JdbcConfig config) {
     if (dataSource != null) {
@@ -35,7 +28,8 @@ public enum HikariDataSourceFactory implements DataSourceFactory {
     final HikariConfig hikariConfig = new HikariConfig();
     hikariConfig.setJdbcUrl(config.getUrl());
 
-    if (isDbCredentialsVaultConfigPresent()) {
+    if (isDbCredentialsVaultConfigPresent(config)) {
+      final var rootConfig = ConfigFactory.create().getConfig();
       final var dbCredentialsVaultService =
           DbCredentialsVaultServiceFactory.getInstance(KeyVaultType.HASHICORP)
               .create(rootConfig, new EnvironmentVariableProvider());
@@ -60,9 +54,8 @@ public enum HikariDataSourceFactory implements DataSourceFactory {
     return dataSource;
   }
 
-  private boolean isDbCredentialsVaultConfigPresent() {
-    var hashicorpVaultDbCredentialsConfig =
-        this.rootConfig.getJdbcConfig().getHashicorpVaultDbCredentialsConfig();
+  private boolean isDbCredentialsVaultConfigPresent(JdbcConfig config) {
+    final var hashicorpVaultDbCredentialsConfig = config.getHashicorpVaultDbCredentialsConfig();
     return hashicorpVaultDbCredentialsConfig != null
         && hashicorpVaultDbCredentialsConfig.getKeyVaultType() == KeyVaultType.HASHICORP;
   }
