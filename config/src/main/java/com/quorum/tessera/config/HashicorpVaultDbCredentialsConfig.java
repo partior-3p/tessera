@@ -39,21 +39,66 @@ public class HashicorpVaultDbCredentialsConfig extends ConfigItem {
   @XmlJavaTypeAdapter(PathAdapter.class)
   private Path tlsTrustStorePath;
 
-  public HashicorpVaultDbCredentialsConfig(
-      String url,
-      String namespace,
-      String approlePath,
-      String dbSecretEngineName,
-      String vaultDbRole,
-      Path tlsKeyStorePath,
-      Path tlsTrustStorePath) {
-    this.url = url;
-    this.namespace = namespace;
-    this.approlePath = approlePath;
-    this.dbSecretEngineName = dbSecretEngineName;
-    this.vaultDbRole = vaultDbRole;
-    this.tlsKeyStorePath = tlsKeyStorePath;
-    this.tlsTrustStorePath = tlsTrustStorePath;
+  @Valid @XmlElement private String retryDelayInSeconds;
+  @Valid @XmlElement private String maxRetryDelayInSeconds;
+  @Valid @XmlElement private String minDelayBeforeNextRunInSeconds;
+  @Valid @XmlElement private String delayBeforeNextRunFactor;
+  @Valid @XmlElement private String maxDurationBeforeTtlExpireInSeconds;
+
+  public HashicorpVaultDbCredentialsConfig(HashicorpVaultDbCredentialsConfig config) {
+    this.url = config.url;
+    this.namespace = config.namespace;
+    this.approlePath = config.approlePath;
+    this.dbSecretEngineName = config.dbSecretEngineName;
+    this.vaultDbRole = config.vaultDbRole;
+    this.credentialType = config.credentialType;
+    this.tlsKeyStorePath = config.tlsKeyStorePath;
+    this.tlsTrustStorePath = config.tlsTrustStorePath;
+    this.retryDelayInSeconds = config.retryDelayInSeconds;
+    this.maxRetryDelayInSeconds = config.maxRetryDelayInSeconds;
+    this.minDelayBeforeNextRunInSeconds = config.minDelayBeforeNextRunInSeconds;
+    this.delayBeforeNextRunFactor = config.delayBeforeNextRunFactor;
+    this.maxDurationBeforeTtlExpireInSeconds = config.maxDurationBeforeTtlExpireInSeconds;
+  }
+
+  public String getRetryDelayInSeconds() {
+    return retryDelayInSeconds;
+  }
+
+  void setRetryDelayInSeconds(String retryDelayInSeconds) {
+    this.retryDelayInSeconds = retryDelayInSeconds;
+  }
+
+  public String getMaxRetryDelayInSeconds() {
+    return maxRetryDelayInSeconds;
+  }
+
+  void setMaxRetryDelayInSeconds(String maxRetryDelayInSeconds) {
+    this.maxRetryDelayInSeconds = maxRetryDelayInSeconds;
+  }
+
+  public String getMinDelayBeforeNextRunInSeconds() {
+    return minDelayBeforeNextRunInSeconds;
+  }
+
+  void setMinDelayBeforeNextRunInSeconds(String minDelayBeforeNextRunInSeconds) {
+    this.minDelayBeforeNextRunInSeconds = minDelayBeforeNextRunInSeconds;
+  }
+
+  public String getDelayBeforeNextRunFactor() {
+    return delayBeforeNextRunFactor;
+  }
+
+  void setDelayBeforeNextRunFactor(String delayBeforeNextRunFactor) {
+    this.delayBeforeNextRunFactor = delayBeforeNextRunFactor;
+  }
+
+  public String getMaxDurationBeforeTtlExpireInSeconds() {
+    return maxDurationBeforeTtlExpireInSeconds;
+  }
+
+  void setMaxDurationBeforeTtlExpireInSeconds(String maxDurationBeforeTtlExpireInSeconds) {
+    this.maxDurationBeforeTtlExpireInSeconds = maxDurationBeforeTtlExpireInSeconds;
   }
 
   public HashicorpVaultDbCredentialsConfig() {}
@@ -62,7 +107,7 @@ public class HashicorpVaultDbCredentialsConfig extends ConfigItem {
     return this.url;
   }
 
-  public void setUrl(String url) {
+  void setUrl(String url) {
     this.url = url;
   }
 
@@ -70,7 +115,7 @@ public class HashicorpVaultDbCredentialsConfig extends ConfigItem {
     return namespace;
   }
 
-  public void setNamespace(String namespace) {
+  void setNamespace(String namespace) {
     this.namespace = namespace;
   }
 
@@ -81,7 +126,7 @@ public class HashicorpVaultDbCredentialsConfig extends ConfigItem {
     return dbSecretEngineName;
   }
 
-  public void setDbSecretEngineName(String dbSecretEngineName) {
+  void setDbSecretEngineName(String dbSecretEngineName) {
     this.dbSecretEngineName = dbSecretEngineName;
   }
 
@@ -89,7 +134,7 @@ public class HashicorpVaultDbCredentialsConfig extends ConfigItem {
     return vaultDbRole;
   }
 
-  public void setVaultDbRole(String vaultDbRole) {
+  void setVaultDbRole(String vaultDbRole) {
     this.vaultDbRole = vaultDbRole;
   }
 
@@ -97,7 +142,7 @@ public class HashicorpVaultDbCredentialsConfig extends ConfigItem {
     return tlsKeyStorePath;
   }
 
-  public void setTlsKeyStorePath(Path tlsKeyStorePath) {
+  void setTlsKeyStorePath(Path tlsKeyStorePath) {
     this.tlsKeyStorePath = tlsKeyStorePath;
   }
 
@@ -105,7 +150,7 @@ public class HashicorpVaultDbCredentialsConfig extends ConfigItem {
     return tlsTrustStorePath;
   }
 
-  public void setTlsTrustStorePath(Path tlsTrustStorePath) {
+  void setTlsTrustStorePath(Path tlsTrustStorePath) {
     this.tlsTrustStorePath = tlsTrustStorePath;
   }
 
@@ -116,7 +161,7 @@ public class HashicorpVaultDbCredentialsConfig extends ConfigItem {
     return approlePath;
   }
 
-  public void setApprolePath(String approlePath) {
+  void setApprolePath(String approlePath) {
     this.approlePath = approlePath;
   }
 
@@ -128,7 +173,7 @@ public class HashicorpVaultDbCredentialsConfig extends ConfigItem {
     return credentialType;
   }
 
-  public void setCredentialType(String credentialType) {
+  void setCredentialType(String credentialType) {
     this.credentialType = credentialType;
   }
 
@@ -141,6 +186,12 @@ public class HashicorpVaultDbCredentialsConfig extends ConfigItem {
     config.setProperty("vaultDbRole", this.getVaultDbRole());
     config.setProperty("credentialType", this.getCredentialType());
     config.setProperty("namespace", this.getNamespace());
+    config.setProperty("retryDelayInSeconds", this.getRetryDelayInSeconds());
+    config.setProperty("maxRetryDelayInSeconds", this.getMaxRetryDelayInSeconds());
+    config.setProperty("minDelayBeforeNextRunInSeconds", this.getMinDelayBeforeNextRunInSeconds());
+    config.setProperty("delayBeforeNextRunFactor", this.getDelayBeforeNextRunFactor());
+    config.setProperty(
+        "maxDurationBeforeTtlExpireInSeconds", this.getMaxDurationBeforeTtlExpireInSeconds());
 
     Optional.ofNullable(this.getTlsKeyStorePath())
         .map(Objects::toString)
