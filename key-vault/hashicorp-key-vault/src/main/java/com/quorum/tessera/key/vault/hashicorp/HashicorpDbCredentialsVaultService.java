@@ -1,6 +1,5 @@
 package com.quorum.tessera.key.vault.hashicorp;
 
-import com.quorum.tessera.config.ConfigException;
 import com.quorum.tessera.config.KeyVaultConfig;
 import com.quorum.tessera.key.vault.DbCredentials;
 import com.quorum.tessera.key.vault.DbCredentialsVaultService;
@@ -11,7 +10,6 @@ import org.springframework.vault.support.VaultResponse;
 public class HashicorpDbCredentialsVaultService implements DbCredentialsVaultService {
 
   private final VaultOperations vaultOperations;
-  private final KeyVaultConfig keyVaultConfig;
 
   private String dbSecretEngineName = "database";
   private String vaultDbRole;
@@ -23,7 +21,6 @@ public class HashicorpDbCredentialsVaultService implements DbCredentialsVaultSer
       VaultOperations vaultOperations, KeyVaultConfig keyVaultConfig) {
 
     this.vaultOperations = vaultOperations;
-    this.keyVaultConfig = keyVaultConfig;
     this.vaultDbRole = keyVaultConfig.getProperty("vaultDbRole").get();
 
     if (keyVaultConfig.hasProperty("dbSecretEngineName")
@@ -52,8 +49,8 @@ public class HashicorpDbCredentialsVaultService implements DbCredentialsVaultSer
           vaultOperations.read(
               String.format("%s/%s/%s", dbSecretEngineName, credentialPath, vaultDbRole));
     } catch (Exception ex) {
-      throw new ConfigException(
-          new RuntimeException("Unexpected error reading db credentials from hashicorp vault", ex));
+      throw new HashicorpDbCredentialsVaultException(
+          "Unexpected error reading db credentials from hashicorp vault", ex);
     }
 
     if (response != null) {
@@ -67,9 +64,8 @@ public class HashicorpDbCredentialsVaultService implements DbCredentialsVaultSer
                 : response.getLeaseDuration());
       }
     } else {
-      throw new ConfigException(
-          new RuntimeException(
-              "Empty response from Hashicorp vault while trying to retrieve database credentials."));
+      throw new HashicorpDbCredentialsVaultException(
+          "Empty response from Hashicorp vault while trying to retrieve database credentials.");
     }
     return credentials;
   }
