@@ -75,7 +75,7 @@ class HashicorpVaultServiceFactory {
       vaultEndpoint = VaultEndpoint.from(uri);
     } catch (URISyntaxException | NoSuchElementException | IllegalArgumentException e) {
       throw new ConfigException(
-          new RuntimeException("Provided Hashicorp Vault url is incorrectly formatted", e));
+          new HashicorpVaultException("Provided Hashicorp Vault url is incorrectly formatted"));
     }
 
     SslConfiguration sslConfiguration = util.configureSsl(keyVaultConfig, envProvider);
