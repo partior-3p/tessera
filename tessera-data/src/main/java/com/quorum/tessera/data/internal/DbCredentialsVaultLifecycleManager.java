@@ -104,12 +104,13 @@ public class DbCredentialsVaultLifecycleManager {
     StringBuilder sb = new StringBuilder();
     int levelCount = 0;
     final int maxLevelCount = 5;
-    while (e != null) {
+    var exception = e;
+    while (exception != null) {
       if (levelCount > 0) {
         sb.append(". ");
       }
-      sb.append(e.getMessage());
-      e = e.getCause();
+      sb.append(exception.getMessage());
+      exception = exception.getCause();
       levelCount++;
       if (levelCount > maxLevelCount) {
         sb.append("...");
@@ -163,19 +164,8 @@ public class DbCredentialsVaultLifecycleManager {
             300L,
             errors);
     if (!errors.isEmpty()) {
-      throw new ConfigException(new Exception(String.join(" ", errors)));
+      throw new ConfigException(String.join(" ", errors));
     }
-  }
-
-  private <R> R validateAndConvertValue(
-      final String propertyName,
-      final String value,
-      Function<String, R> converter,
-      final R defaultValue,
-      List<String> outputError) {
-
-    return validateAndConvertValue(
-        propertyName, value, converter, List.of(), defaultValue, outputError);
   }
 
   private <R> R validateAndConvertValue(

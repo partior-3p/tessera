@@ -53,7 +53,7 @@ public class HashicorpDbCredentialsVaultServiceFactory extends HashicorpVaultSer
             .toList();
     if (!missingProperties.isEmpty()) {
       throw new ConfigException(
-          new RuntimeException(
+          new HashicorpVaultException(
               String.format(
                   "[%s] missing in the configuration. This/these properties should be defined in configuration section: jdbc.hashicorpVaultDbCredentialsConfig",
                   String.join(", ", missingProperties))));

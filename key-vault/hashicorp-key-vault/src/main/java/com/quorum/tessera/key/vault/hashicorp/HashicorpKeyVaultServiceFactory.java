@@ -34,7 +34,7 @@ public class HashicorpKeyVaultServiceFactory extends HashicorpVaultServiceFactor
   }
 
   private HashicorpKeyVaultService getKeyVaultService(
-      VaultOperations vaultOperations, KeyVaultConfig keyVaultConfig) {
+      VaultOperations vaultOperations, KeyVaultConfig unusedKeyVaultConfig) {
     return new HashicorpKeyVaultService(
         vaultOperations, () -> new VaultVersionedKeyValueTemplateFactory() {});
   }
@@ -45,7 +45,7 @@ public class HashicorpKeyVaultServiceFactory extends HashicorpVaultServiceFactor
         .orElseThrow(
             () ->
                 new ConfigException(
-                    new RuntimeException(
+                    new HashicorpVaultException(
                         "Trying to create Hashicorp Vault connection but no Vault configuration provided")));
   }
 
