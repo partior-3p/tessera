@@ -107,8 +107,6 @@ public class HashicorpVaultDbCredentialsConfig extends ConfigItem {
     this.maxDurationBeforeTtlExpireInSeconds = maxDurationBeforeTtlExpireInSeconds;
   }
 
-  public HashicorpVaultDbCredentialsConfig() {}
-
   public String getUrl() {
     return this.url;
   }
