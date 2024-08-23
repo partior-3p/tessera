@@ -45,20 +45,26 @@ public class HashicorpVaultDbCredentialsConfig extends ConfigItem {
   @Valid @XmlElement private String delayBeforeNextRunFactor;
   @Valid @XmlElement private String maxDurationBeforeTtlExpireInSeconds;
 
-  public HashicorpVaultDbCredentialsConfig(HashicorpVaultDbCredentialsConfig config) {
-    this.url = config.url;
-    this.namespace = config.namespace;
-    this.approlePath = config.approlePath;
-    this.dbSecretEngineName = config.dbSecretEngineName;
-    this.vaultDbRole = config.vaultDbRole;
-    this.credentialType = config.credentialType;
-    this.tlsKeyStorePath = config.tlsKeyStorePath;
-    this.tlsTrustStorePath = config.tlsTrustStorePath;
-    this.retryDelayInSeconds = config.retryDelayInSeconds;
-    this.maxRetryDelayInSeconds = config.maxRetryDelayInSeconds;
-    this.minDelayBeforeNextRunInSeconds = config.minDelayBeforeNextRunInSeconds;
-    this.delayBeforeNextRunFactor = config.delayBeforeNextRunFactor;
-    this.maxDurationBeforeTtlExpireInSeconds = config.maxDurationBeforeTtlExpireInSeconds;
+  public static HashicorpVaultDbCredentialsConfig clone(
+      HashicorpVaultDbCredentialsConfig instance) {
+    if (instance == null) {
+      return null;
+    }
+    var newInstance = new HashicorpVaultDbCredentialsConfig();
+    newInstance.url = instance.url;
+    newInstance.namespace = instance.namespace;
+    newInstance.approlePath = instance.approlePath;
+    newInstance.dbSecretEngineName = instance.dbSecretEngineName;
+    newInstance.vaultDbRole = instance.vaultDbRole;
+    newInstance.credentialType = instance.credentialType;
+    newInstance.tlsKeyStorePath = instance.tlsKeyStorePath;
+    newInstance.tlsTrustStorePath = instance.tlsTrustStorePath;
+    newInstance.retryDelayInSeconds = instance.retryDelayInSeconds;
+    newInstance.maxRetryDelayInSeconds = instance.maxRetryDelayInSeconds;
+    newInstance.minDelayBeforeNextRunInSeconds = instance.minDelayBeforeNextRunInSeconds;
+    newInstance.delayBeforeNextRunFactor = instance.delayBeforeNextRunFactor;
+    newInstance.maxDurationBeforeTtlExpireInSeconds = instance.maxDurationBeforeTtlExpireInSeconds;
+    return newInstance;
   }
 
   public String getRetryDelayInSeconds() {
