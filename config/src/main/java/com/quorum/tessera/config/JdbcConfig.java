@@ -67,7 +67,7 @@ public class JdbcConfig extends ConfigItem {
   }
 
   public HashicorpVaultDbCredentialsConfig getHashicorpVaultDbCredentialsConfig() {
-    return new HashicorpVaultDbCredentialsConfig(hashicorpVaultDbCredentialsConfig);
+    return HashicorpVaultDbCredentialsConfig.clone(this.hashicorpVaultDbCredentialsConfig);
   }
 
   void setHashicorpVaultDbCredentialsConfig(
