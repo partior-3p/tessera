@@ -58,6 +58,8 @@ public class HashicorpStepDefs implements En {
 
   private final AtomicReference<Process> tesseraProcess = new AtomicReference<>();
 
+  private final HashicorpDbSecretEngineCommands hashicorpDbSecretEngineCommands = new HashicorpDbSecretEngineCommands();
+
   public HashicorpStepDefs() {
     final AtomicReference<Process> vaultServerProcess = new AtomicReference<>();
 
@@ -749,6 +751,12 @@ public class HashicorpStepDefs implements En {
           assertThat(keyDataObject.getString("privateKey")).isNotBlank();
         });
 
+    Given("^PostgeSql server started$",
+      ()->{
+        hashicorpDbSecretEngineCommands.startPostgreSqlServer();
+        hashicorpDbSecretEngineCommands.waitForPostgreSqlServerToBeOnline();
+      });
+
     After(
         () -> {
           if (vaultServerProcess.get() != null && vaultServerProcess.get().isAlive()) {
@@ -758,6 +766,8 @@ public class HashicorpStepDefs implements En {
           if (tesseraProcess.get() != null && tesseraProcess.get().isAlive()) {
             tesseraProcess.get().destroy();
           }
+
+          hashicorpDbSecretEngineCommands.stopPostgreSqlServer();
         });
   }
 
