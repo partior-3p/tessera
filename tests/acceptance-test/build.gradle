@@ -71,6 +71,11 @@ dependencies {
   testImplementation "org.eclipse.jetty:jetty-servlet"
 
   implementation "org.yaml:snakeyaml"
+  testImplementation "org.yaml:snakeyaml"
+  testImplementation 'org.postgresql:postgresql:42.6.0'
+  testImplementation ('org.awaitility:awaitility:4.2.0') {
+    exclude group: 'org.hamcrest'
+  }
 
 }
 
@@ -112,6 +117,7 @@ test {
     "**/AzureKeyVaultIT.class",
     "**/ThirdPartyIT.class",
     "**/CucumberTestSuite.class",
+    "**/RunHashicorpDbSecretEngineIT.class"
     )
 
   if(!file("/usr/local/lib").exists() ||  file("/usr/local/lib/").listFiles(new FilenameFilter() {
