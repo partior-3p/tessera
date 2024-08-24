@@ -1,4 +1,5 @@
 package com.quorum.tessera.test.vault.hashicorp;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,21 +32,25 @@ public class ProcessHandler {
     return process.waitFor();
   }
 
-  // Wait for the process to complete with a timeout and output its console stream to the parent process
-  public int waitForCompletion(Duration timeout) throws TimeoutException, InterruptedException, ExecutionException, IOException {
+  // Wait for the process to complete with a timeout and output its console stream to the parent
+  // process
+  public int waitForCompletion(Duration timeout)
+      throws TimeoutException, InterruptedException, ExecutionException, IOException {
     // Capture output and print to parent console in real-time
-    if (!process.isAlive()){
+    if (!process.isAlive()) {
       return 0;
     }
 
-    Future<Integer> future = executorService.submit(() -> {
-      try {
-        captureConsoleOutput(process.getInputStream(), System.out);
-        return process.waitFor();
-      } catch (InterruptedException e) {
-        throw new RuntimeException("Process interrupted", e);
-      }
-    });
+    Future<Integer> future =
+        executorService.submit(
+            () -> {
+              try {
+                captureConsoleOutput(process.getInputStream(), System.out);
+                return process.waitFor();
+              } catch (InterruptedException e) {
+                throw new RuntimeException("Process interrupted", e);
+              }
+            });
 
     try {
       return future.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
@@ -71,7 +76,8 @@ public class ProcessHandler {
 
   // Check if a pattern matches in the console output, terminate process if found
   public boolean checkForPatternAndTerminate(Pattern pattern) throws IOException {
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+    try (BufferedReader reader =
+        new BufferedReader(new InputStreamReader(process.getInputStream()))) {
       String line;
       while ((line = reader.readLine()) != null) {
         System.out.println("Console output: " + line); // Optionally log output
@@ -87,7 +93,7 @@ public class ProcessHandler {
 
   public static void testProcessHanler() {
     // Example usage
-    List<String> command = List.of("ping","-t", "google.com");
+    List<String> command = List.of("ping", "-t", "google.com");
     ProcessHandler processHandler = new ProcessHandler(command);
     Pattern pattern = Pattern.compile("time=6ms"); // Match 'time' in ping response
 
