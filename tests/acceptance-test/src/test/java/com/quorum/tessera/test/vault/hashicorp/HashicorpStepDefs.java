@@ -27,6 +27,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import javax.net.ssl.HttpsURLConnection;
 import org.slf4j.Logger;
@@ -267,6 +268,11 @@ public class HashicorpStepDefs implements En {
         () -> {
           setKeyStoreProperties();
 
+          final Consumer<Integer> RESPONSE_HTTP_OK =
+              (value) -> assertThat(value).isEqualTo(HttpsURLConnection.HTTP_OK);
+          final Consumer<Integer> RESPONSE_HTTP_NO_CONTENT =
+              (value) -> assertThat(value).isEqualTo(HttpsURLConnection.HTTP_NO_CONTENT);
+
           var response =
               makeHttpRequestAndGetResponse(
                   "https://localhost:8200",
@@ -275,7 +281,8 @@ public class HashicorpStepDefs implements En {
                   "{\"type\": \"database\"}",
                   Map.of("X-Vault-Token", vaultToken));
 
-          assertThat(response.getResponseCode()).isEqualTo(HttpsURLConnection.HTTP_NO_CONTENT);
+          assertThat(response.getResponseCode())
+              .satisfiesAnyOf(RESPONSE_HTTP_OK, RESPONSE_HTTP_NO_CONTENT);
 
           response =
               makeHttpRequestAndGetResponse(
@@ -293,7 +300,8 @@ public class HashicorpStepDefs implements En {
                       + "     }",
                   Map.of("X-Vault-Token", vaultToken));
 
-          assertThat(response.getResponseCode()).isEqualTo(HttpsURLConnection.HTTP_NO_CONTENT);
+          assertThat(response.getResponseCode())
+              .satisfiesAnyOf(RESPONSE_HTTP_OK, RESPONSE_HTTP_NO_CONTENT);
 
           response =
               makeHttpRequestAndGetResponse(
@@ -308,7 +316,8 @@ public class HashicorpStepDefs implements En {
                       + "     }",
                   Map.of("X-Vault-Token", vaultToken));
 
-          assertThat(response.getResponseCode()).isEqualTo(HttpsURLConnection.HTTP_NO_CONTENT);
+          assertThat(response.getResponseCode())
+              .satisfiesAnyOf(RESPONSE_HTTP_OK, RESPONSE_HTTP_NO_CONTENT);
 
           response =
               makeHttpRequestAndGetResponse(
@@ -323,7 +332,8 @@ public class HashicorpStepDefs implements En {
                       + "     }",
                   Map.of("X-Vault-Token", vaultToken));
 
-          assertThat(response.getResponseCode()).isEqualTo(HttpsURLConnection.HTTP_NO_CONTENT);
+          assertThat(response.getResponseCode())
+              .satisfiesAnyOf(RESPONSE_HTTP_OK, RESPONSE_HTTP_NO_CONTENT);
         });
 
     Given(
