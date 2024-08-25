@@ -284,7 +284,7 @@ public class HashicorpStepDefs implements En {
                   "POST",
                   "{\n"
                       + "        \"plugin_name\": \"postgresql-database-plugin\",\n"
-                      + "        \"allowed_roles\": \"tessera-db-role, tessera-db-static-role\",\n"
+                      + "        \"allowed_roles\": [\"tessera-db-role\", \"tessera-db-static-role\"],\n"
                       + "        \"connection_url\": \"postgresql://{{username}}:{{password}}@localhost:5432/tesseradb\",\n"
                       + "        \"username\": \"testadmin\",\n"
                       + "        \"password\": \"testadmin\",\n"
@@ -301,7 +301,7 @@ public class HashicorpStepDefs implements En {
                   String.format("v1/%s/roles/tessera-db-role", databaseSecretEngineName),
                   "POST",
                   "{\n"
-                      + "        \"db_name\": \"tesseradb\",\n"
+                      + "        \"db_name\": \"tessera-conn\",\n"
                       + "        \"creation_statements\": \"CREATE ROLE \\\"{{name}}\\\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';  GRANT \\\"testtest\\\" TO \\\"{{name}}\\\";\",\n"
                       + "        \"default_ttl\": \"60s\",\n"
                       + "        \"max_ttl\": \"120s\"\n"
@@ -311,16 +311,17 @@ public class HashicorpStepDefs implements En {
           assertThat(response.getResponseCode()).isEqualTo(HttpsURLConnection.HTTP_NO_CONTENT);
 
           response =
-            makeHttpRequestAndGetResponse(
-              "https://localhost:8200",
-              String.format("v1/%s/roles/tessera-db-static-role", databaseSecretEngineName),
-              "POST",
-              "{\n"
-                + "        \"db_name\": \"tesseradb\",\n"
-                + "        \"username\": \"testtest\",\n"
-                + "        \"rotation_period\": \"60s\"\n"
-                + "     }",
-              Map.of("X-Vault-Token", vaultToken));
+              makeHttpRequestAndGetResponse(
+                  "https://localhost:8200",
+                  String.format(
+                      "v1/%s/static-roles/tessera-db-static-role", databaseSecretEngineName),
+                  "POST",
+                  "{\n"
+                      + "        \"db_name\": \"tessera-conn\",\n"
+                      + "        \"username\": \"testtest\",\n"
+                      + "        \"rotation_period\": \"60s\"\n"
+                      + "     }",
+                  Map.of("X-Vault-Token", vaultToken));
 
           assertThat(response.getResponseCode()).isEqualTo(HttpsURLConnection.HTTP_NO_CONTENT);
         });
@@ -407,8 +408,8 @@ public class HashicorpStepDefs implements En {
               String.format(
                   "{ \"policy\": \"path \\\"%s/data/tessera*\\\" { capabilities = [\\\"create\\\", \\\"update\\\", \\\"read\\\"]}\\n"
                       + "path \\\"%s/*\\\" { capabilities = [\\\"create\\\", \\\"update\\\", \\\"read\\\",\\\"delete\\\", \\\"list\\\", \\\"sudo\\\"]}\\n"
-                      + "path \\\"%s/static-roles/*\\\" { capabilities = [\\\"create\\\", \\\"update\\\", \\\"read\\\"]}\\n"
-                      + "path \\\"%s/roles/*\\\" { capabilities = [\\\"create\\\", \\\"update\\\", \\\"read\\\"]}\\n"
+                      + "path \\\"%s/static-roles/*\\\" { capabilities = [\\\"create\\\", \\\"update\\\", \\\"read\\\",\\\"delete\\\", \\\"list\\\"]}\\n"
+                      + "path \\\"%s/roles/*\\\" { capabilities = [\\\"create\\\", \\\"update\\\", \\\"read\\\",\\\"delete\\\", \\\"list\\\"]}\\n"
                       + "path \\\"transit/encrypt/%s\\\" { capabilities = [\\\"create\\\", \\\"update\\\"]}\\n"
                       + "path \\\"transit/decrypt/%s\\\" { capabilities = [\\\"create\\\", \\\"update\\\"]}\\n"
                       + "\" }",
