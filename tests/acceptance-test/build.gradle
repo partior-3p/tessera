@@ -90,6 +90,7 @@ test {
 
   systemProperty "jdbc.hsql.jar",project.configurations.testCompileClasspath.find { it.name.startsWith("hsqldb") }
   systemProperty "jdbc.sqlite.jar",project.configurations.testCompileClasspath.find { it.name.startsWith("sqlite-jdbc") }
+  systemProperty "jdbc.postgresql.jar",project.configurations.testCompileClasspath.find { it.name.startsWith("postgresql") }
 
   systemProperty "keyvault.aws.dist","${buildDir}/unpacked/dist/aws-key-vault-${project.version}/bin/tessera"
   systemProperty "keyvault.azure.dist","${buildDir}/unpacked/dist/azure-key-vault-${project.version}/bin/tessera"
@@ -113,7 +114,8 @@ test {
     "**/AwsKeyVaultIT.class",
     "**/RunHashicorpIT.class",
     "**/ThirdPartyIT.class",
-    "**/CucumberTestSuite.class"
+    "**/CucumberTestSuite.class",
+    "**/RunHashicorpDbSecretEngineIT.class"
     )
 
   if(!file("/usr/local/lib").exists() ||  file("/usr/local/lib/").listFiles(new FilenameFilter() {
@@ -256,6 +258,7 @@ task copyJdbcJars {
   doLast {
     def hsqldbJar = project.configurations.testCompileClasspath.find { it.name.startsWith("hsqldb")}
     def sqliteJar = project.configurations.testCompileClasspath.find { it.name.startsWith("sqlite")}
+    def postgresqlJar = project.configurations.testCompileClasspath.find { it.name.startsWith("postgresql")}
 
     def dirs = file("${buildDir}/unpacked/dist/").listFiles()
     dirs.each {
@@ -268,6 +271,9 @@ task copyJdbcJars {
           into path
 
           from sqliteJar
+          into path
+
+          from postgresqlJar
           into path
         }
       }
