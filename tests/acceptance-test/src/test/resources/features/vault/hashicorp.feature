@@ -8,9 +8,6 @@ Feature: Hashicorp Vault support
         And the vault has a transit secret engine
         And the vault has transit secret key
 
-    Scenario:
-      Given PostgeSql server started
-
     Scenario: Tessera retrieves a key pair from the Vault using the Token auth method
         Given the vault contains a key pair
         And the configfile contains the correct vault configuration
