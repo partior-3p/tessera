@@ -117,8 +117,7 @@ test {
     //"**/RunAzureIT.class",
     "**/AzureKeyVaultIT.class",
     "**/ThirdPartyIT.class",
-    "**/CucumberTestSuite.class",
-    "**/RunHashicorpDbSecretEngineIT.class"
+    "**/CucumberTestSuite.class"
     )
 
   if(!file("/usr/local/lib").exists() ||  file("/usr/local/lib/").listFiles(new FilenameFilter() {
