@@ -8,8 +8,13 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.regex.Pattern;
+import org.assertj.core.util.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProcessHandler {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(ProcessHandler.class);
 
   private final List<String> command;
   private Process process;
@@ -22,6 +27,7 @@ public class ProcessHandler {
 
   // Start the process with the given command arguments
   public void start() throws IOException {
+    LOGGER.info("Starting process with command: {}", Strings.join(command).with(" "));
     ProcessBuilder processBuilder = new ProcessBuilder(command);
     processBuilder.redirectErrorStream(true); // Combine stdout and stderr
     this.process = processBuilder.start();
@@ -38,6 +44,7 @@ public class ProcessHandler {
       throws TimeoutException, InterruptedException, ExecutionException, IOException {
     // Capture output and print to parent console in real-time
     if (!process.isAlive()) {
+      LOGGER.info("Process has already been terminiated. Info: {}", process);
       return 0;
     }
 
@@ -80,7 +87,7 @@ public class ProcessHandler {
         new BufferedReader(new InputStreamReader(process.getInputStream()))) {
       String line;
       while ((line = reader.readLine()) != null) {
-        System.out.println("Console output: " + line); // Optionally log output
+        System.out.println(line);
         if (pattern.matcher(line).find()) {
           System.out.println("Pattern matched: Terminating process...");
           process.destroy();
@@ -89,32 +96,5 @@ public class ProcessHandler {
       }
     }
     return false;
-  }
-
-  public static void testProcessHanler() {
-    // Example usage
-    List<String> command = List.of("ping", "-t", "google.com");
-    ProcessHandler processHandler = new ProcessHandler(command);
-    Pattern pattern = Pattern.compile("time=6ms"); // Match 'time' in ping response
-
-    try {
-      // Start the process
-      processHandler.start();
-
-      // Check for pattern in the console log, terminate if matched
-      boolean matched = processHandler.checkForPatternAndTerminate(pattern);
-      if (matched) {
-        System.out.println("Pattern found. Process terminated.");
-      } else {
-        System.out.println("Pattern not found.");
-      }
-
-      // Wait for the process to complete or timeout, and output to parent console
-      int exitCode = processHandler.waitForCompletion(Duration.ofSeconds(10));
-      System.out.println("Process exited with code: " + exitCode);
-
-    } catch (IOException | TimeoutException | InterruptedException | ExecutionException e) {
-      e.printStackTrace();
-    }
   }
 }
