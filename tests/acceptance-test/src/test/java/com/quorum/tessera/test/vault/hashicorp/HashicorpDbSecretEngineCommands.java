@@ -2,10 +2,14 @@ package com.quorum.tessera.test.vault.hashicorp;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+import com.quorum.tessera.test.util.ElUtil;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import org.awaitility.Awaitility;
 import org.slf4j.Logger;
@@ -18,6 +22,8 @@ public class HashicorpDbSecretEngineCommands {
 
   public void startPostgreSqlServer() {
     try {
+      stopPostgreSqlServer();
+      var initSqlPath = createPostgreSqlInitFileAndGetPath();
       var args =
           List.of(
               "docker",
@@ -25,13 +31,15 @@ public class HashicorpDbSecretEngineCommands {
               "--name",
               "test-postgres",
               "-e",
-              "POSTGRES_USER=test",
+              "POSTGRES_USER=testadmin",
               "-e",
-              "POSTGRES_PASSWORD=test",
+              "POSTGRES_PASSWORD=testadmin",
               "-e",
-              "POSTGRES_DB=testdb",
+              "POSTGRES_DB=tesseradb",
               "-p",
-              "6000:5432",
+              "5432:5432",
+              "-v",
+              initSqlPath + ":/docker-entrypoint-initdb.d/init.sql",
               "-d",
               "postgres:latest");
       ProcessHandler command = new ProcessHandler(args);
@@ -43,15 +51,34 @@ public class HashicorpDbSecretEngineCommands {
     }
   }
 
+  private String createPostgreSqlInitFileAndGetPath() {
+    var sqlInitFilePath =
+        ElUtil.createTempFileFromTemplate(
+            getClass().getResource("/vault/postgres-init.sql"), Map.of());
+    return sqlInitFilePath.toString();
+  }
+
   public void stopPostgreSqlServer() {
     try {
-      ProcessHandler command = new ProcessHandler(List.of("docker", "stop", "test-postgres"));
-      command.start();
-      command.waitForCompletion();
+      var command1 = new ProcessHandler(List.of("docker", "stop", "test-postgres"));
+      command1.start();
 
-      command = new ProcessHandler(List.of("docker", "rm", "test-postgres"));
-      command.start();
-      command.waitForCompletion();
+      var command2 = new ProcessHandler(List.of("docker", "rm", "test-postgres"));
+      command2.start();
+
+      var command3 = new ProcessHandler(List.of("docker", "volume", "prune", "-f"));
+      command3.start();
+
+      List.of(command1, command2, command2)
+          .forEach(
+              cmd -> {
+                try {
+                  cmd.waitForCompletion(Duration.of(10, ChronoUnit.SECONDS));
+                } catch (Exception ex) {
+                  LOGGER.warn("Unexpected error. Continuing ..., details: ", ex);
+                }
+              });
+
     } catch (Exception ex) {
       LOGGER.error("stopPostgreSqlServer", ex);
       throw new RuntimeException(ex);
@@ -60,9 +87,9 @@ public class HashicorpDbSecretEngineCommands {
 
   public void waitForPostgreSqlServerToBeOnline() {
     // PostgreSQL database credentials
-    String url = "jdbc:postgresql://localhost:6000/testdb";
-    String user = "test";
-    String password = "test";
+    String url = "jdbc:postgresql://localhost:5432/tesseradb";
+    String user = "testtest";
+    String password = "testtest";
     AtomicReference<Connection> connection = new AtomicReference<>();
     AtomicReference<Integer> counter = new AtomicReference<>(0);
 

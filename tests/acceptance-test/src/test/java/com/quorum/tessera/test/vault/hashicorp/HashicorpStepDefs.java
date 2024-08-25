@@ -46,6 +46,8 @@ public class HashicorpStepDefs implements En {
 
   private final String transitSecretEngineName = "transit";
 
+  private final String databaseSecretEngineName = "business/database";
+
   private final String transitKeyName = "tessera-tse-key";
 
   private String approleRoleId;
@@ -261,6 +263,69 @@ public class HashicorpStepDefs implements En {
         });
 
     Given(
+        "the vault has a database secret engine",
+        () -> {
+          setKeyStoreProperties();
+
+          var response =
+              makeHttpRequestAndGetResponse(
+                  "https://localhost:8200",
+                  String.format("v1/sys/mounts/%s", databaseSecretEngineName),
+                  "POST",
+                  "{\"type\": \"database\"}",
+                  Map.of("X-Vault-Token", vaultToken));
+
+          assertThat(response.getResponseCode()).isEqualTo(HttpsURLConnection.HTTP_NO_CONTENT);
+
+          response =
+              makeHttpRequestAndGetResponse(
+                  "https://localhost:8200",
+                  String.format("v1/%s/config/tessera-conn", databaseSecretEngineName),
+                  "POST",
+                  "{\n"
+                      + "        \"plugin_name\": \"postgresql-database-plugin\",\n"
+                      + "        \"allowed_roles\": \"tessera-db-role, tessera-db-static-role\",\n"
+                      + "        \"connection_url\": \"postgresql://{{username}}:{{password}}@localhost:5432/tesseradb\",\n"
+                      + "        \"username\": \"testadmin\",\n"
+                      + "        \"password\": \"testadmin\",\n"
+                      + "        \"password_authentication\": \"password\",\n"
+                      + "        \"verify_connection\": \"false\"\n"
+                      + "     }",
+                  Map.of("X-Vault-Token", vaultToken));
+
+          assertThat(response.getResponseCode()).isEqualTo(HttpsURLConnection.HTTP_NO_CONTENT);
+
+          response =
+              makeHttpRequestAndGetResponse(
+                  "https://localhost:8200",
+                  String.format("v1/%s/roles/tessera-db-role", databaseSecretEngineName),
+                  "POST",
+                  "{\n"
+                      + "        \"db_name\": \"tesseradb\",\n"
+                      + "        \"creation_statements\": \"CREATE ROLE \\\"{{name}}\\\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';  GRANT \\\"testtest\\\" TO \\\"{{name}}\\\";\",\n"
+                      + "        \"default_ttl\": \"60s\",\n"
+                      + "        \"max_ttl\": \"120s\"\n"
+                      + "     }",
+                  Map.of("X-Vault-Token", vaultToken));
+
+          assertThat(response.getResponseCode()).isEqualTo(HttpsURLConnection.HTTP_NO_CONTENT);
+
+          response =
+            makeHttpRequestAndGetResponse(
+              "https://localhost:8200",
+              String.format("v1/%s/roles/tessera-db-static-role", databaseSecretEngineName),
+              "POST",
+              "{\n"
+                + "        \"db_name\": \"tesseradb\",\n"
+                + "        \"username\": \"testtest\",\n"
+                + "        \"rotation_period\": \"60s\"\n"
+                + "     }",
+              Map.of("X-Vault-Token", vaultToken));
+
+          assertThat(response.getResponseCode()).isEqualTo(HttpsURLConnection.HTTP_NO_CONTENT);
+        });
+
+    Given(
         "the vault has transit secret key",
         () -> {
           setKeyStoreProperties();
@@ -341,14 +406,18 @@ public class HashicorpStepDefs implements En {
           final String createPolicyData =
               String.format(
                   "{ \"policy\": \"path \\\"%s/data/tessera*\\\" { capabilities = [\\\"create\\\", \\\"update\\\", \\\"read\\\"]}\\n"
-                      + "path \\\"transit/encrypt/"
-                      + transitKeyName
-                      + "\\\" { capabilities = [\\\"create\\\", \\\"update\\\"]}\\n"
-                      + "path \\\"transit/decrypt/"
-                      + transitKeyName
-                      + "\\\" { capabilities = [\\\"create\\\", \\\"update\\\"]}\\n"
+                      + "path \\\"%s/*\\\" { capabilities = [\\\"create\\\", \\\"update\\\", \\\"read\\\",\\\"delete\\\", \\\"list\\\", \\\"sudo\\\"]}\\n"
+                      + "path \\\"%s/static-roles/*\\\" { capabilities = [\\\"create\\\", \\\"update\\\", \\\"read\\\"]}\\n"
+                      + "path \\\"%s/roles/*\\\" { capabilities = [\\\"create\\\", \\\"update\\\", \\\"read\\\"]}\\n"
+                      + "path \\\"transit/encrypt/%s\\\" { capabilities = [\\\"create\\\", \\\"update\\\"]}\\n"
+                      + "path \\\"transit/decrypt/%s\\\" { capabilities = [\\\"create\\\", \\\"update\\\"]}\\n"
                       + "\" }",
-                  secretEngineName);
+                  secretEngineName,
+                  databaseSecretEngineName,
+                  databaseSecretEngineName,
+                  databaseSecretEngineName,
+                  transitKeyName,
+                  transitKeyName);
 
           try (OutputStreamWriter writer =
               new OutputStreamWriter(createPolicyUrlConnection.getOutputStream())) {
@@ -556,6 +625,12 @@ public class HashicorpStepDefs implements En {
 
           assertThat(config.getKeys().getHashicorpKeyVaultConfig())
               .isEqualToComparingFieldByField(expectedVaultConfig);
+        });
+
+    Given(
+        "^the configfile is created that contains the postgresql settings",
+        () -> {
+          createTempTesseraWithPostgreSqlAndSecretEngineConfig();
         });
 
     Given(
@@ -795,6 +870,20 @@ public class HashicorpStepDefs implements En {
     }
   }
 
+  private void createTempTesseraWithPostgreSqlAndSecretEngineConfig() {
+    Map<String, Object> params = new HashMap<>();
+    params.put("clientKeystore", getClientTlsKeystore());
+    params.put("clientTruststore", getClientTlsTruststore());
+
+    tempTesseraConfig =
+        ElUtil.createTempFileFromTemplate(
+            getClass()
+                .getResource(
+                    "/vault/tessera-hashicorp-config-postgres-vault-db-secret-engine.json"),
+            params);
+    tempTesseraConfig.toFile().deleteOnExit();
+  }
+
   private void createTempTesseraConfigWithApprole(String approlePath) {
     if (tempTesseraConfig == null) {
       Map<String, Object> params = new HashMap<>();
@@ -859,6 +948,54 @@ public class HashicorpStepDefs implements En {
 
   private String getServerTlsKey() {
     return getClass().getResource("/certificates/server-localhost-with-san.key.pem").getFile();
+  }
+
+  private TestHttpReponse makeHttpRequestAndGetResponse(
+      String uri, String path, String method, String data, Map<String, String> headers) {
+    try {
+      return makeHttpRequestAndGetResponse(
+          UriBuilder.fromUri(uri).path(path).build().toURL(), method, data, headers);
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+
+  private TestHttpReponse makeHttpRequestAndGetResponse(
+      URL url, String method, String data, Map<String, String> headers) {
+    try {
+      HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+
+      urlConnection.setDoOutput(true);
+      urlConnection.setRequestMethod(method);
+      if (!headers.isEmpty()) {
+        headers.forEach(urlConnection::setRequestProperty);
+      }
+
+      if (List.of("POST", "PUT").contains(method)) {
+        try (OutputStreamWriter writer = new OutputStreamWriter(urlConnection.getOutputStream())) {
+          writer.write(data);
+        }
+      }
+
+      var response = new TestHttpReponse();
+
+      StringBuilder stringBodyContent = new StringBuilder();
+      try (BufferedReader reader =
+          new BufferedReader(new InputStreamReader(urlConnection.getInputStream()))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+          stringBodyContent.append(line);
+        }
+      }
+
+      response.setResponseCode(urlConnection.getResponseCode());
+      response.setResponseBody(stringBodyContent.toString());
+
+      return response;
+
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
+    }
   }
 
   private String getClientCaTlsCert() {

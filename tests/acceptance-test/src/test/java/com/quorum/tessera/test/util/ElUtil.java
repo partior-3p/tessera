@@ -14,8 +14,11 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -58,6 +61,13 @@ public class ElUtil {
               .collect(Collectors.joining(System.lineSeparator()));
 
       Path file = Files.createTempFile(UUID.randomUUID().toString(), ".txt");
+
+      if (System.getProperty("os.name").startsWith("Linux")
+          || System.getProperty("os.name").startsWith("Mac")) {
+        Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rw-r--r--");
+        Files.setPosixFilePermissions(file, perms);
+      }
+
       file.toFile().deleteOnExit();
       Files.write(file, data.getBytes());
 
