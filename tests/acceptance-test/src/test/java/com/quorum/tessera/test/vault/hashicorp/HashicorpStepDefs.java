@@ -1005,7 +1005,7 @@ public class HashicorpStepDefs implements En {
       return response;
 
     } catch (Exception ex) {
-      throw new RuntimeException(ex);
+      throw new TestRuntimeException(ex);
     }
   }
 

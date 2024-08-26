@@ -55,7 +55,7 @@ public class ProcessHandler {
                 captureConsoleOutput(process.getInputStream(), System.out);
                 return process.waitFor();
               } catch (InterruptedException e) {
-                throw new RuntimeException("Process interrupted", e);
+                throw new TestRuntimeException("Process interrupted", e);
               }
             });
 
