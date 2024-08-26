@@ -47,7 +47,7 @@ public class HashicorpDbSecretEngineCommands {
       command.waitForCompletion();
     } catch (Exception ex) {
       LOGGER.error("Unexpected error while starting PostgreSql server", ex);
-      throw new RuntimeException(ex);
+      throw new TestRuntimeException(ex);
     }
   }
 
@@ -81,7 +81,7 @@ public class HashicorpDbSecretEngineCommands {
 
     } catch (Exception ex) {
       LOGGER.error("stopPostgreSqlServer", ex);
-      throw new RuntimeException(ex);
+      throw new TestRuntimeException(ex);
     }
   }
 

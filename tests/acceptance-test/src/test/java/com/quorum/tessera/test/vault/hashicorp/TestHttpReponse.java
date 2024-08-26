@@ -1,6 +1,10 @@
 package com.quorum.tessera.test.vault.hashicorp;
 
 public class TestHttpReponse {
+
+  private int responseCode;
+  private String responseBody;
+
   public int getResponseCode() {
     return responseCode;
   }
@@ -16,7 +20,4 @@ public class TestHttpReponse {
   public void setResponseBody(String responseBody) {
     this.responseBody = responseBody;
   }
-
-  private int responseCode;
-  private String responseBody;
 }
