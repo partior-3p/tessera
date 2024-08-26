@@ -7,7 +7,7 @@ Feature: Hashicorp Vault support with DB Secret Engine
     And the vault has a v2 kv secret engine
     And the vault has a database secret engine
 
-  Scenario: Tessera connects to PostgeSql database using credentials from the Vault Db Scret Engine and retrieves a key pair from the Vault
+  Scenario: Tessera connects to PostgeSql database using credentials from the Vault DB Secret Engine and retrieves a key pair from the Vault
     Given the vault contains a key pair
     And the AppRole auth method is enabled at the default path
     And the configfile is created that contains the postgresql settings
