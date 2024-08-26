@@ -1,4 +1,4 @@
-Feature: Hashicorp Vault support With DB Secret Engine
+Feature: Hashicorp Vault support with DB Secret Engine,
 Storing and retrieving Tessera public/private key pairs from a Hashicorp Vault
 
   Background:
@@ -8,13 +8,14 @@ Storing and retrieving Tessera public/private key pairs from a Hashicorp Vault
     And the vault has a v2 kv secret engine
     And the vault has a database secret engine
 
-  Scenario: Tessera retrieves a key pair from the Vault using the default AppRole auth method without having to specify the default path
+  Scenario: Tessera connects to PostgeSql database using credentials from the Vault Db Scret Engine,
+  and retrieves a key pair from the Vault using the default AppRole auth method without having to specify the default path
     Given the vault contains a key pair
     And the AppRole auth method is enabled at the default path
     And the configfile is created that contains the postgresql settings
     And the configfile contains the correct vault configuration
     And the configfile contains the correct key data
-    When Tessera is started with the following CLI args and approle environment variables
+    Then Tessera is started with the following CLI args and approle environment variables
     """
     -configfile %s -pidfile %s -o jdbc.autoCreateTables=true
     """
