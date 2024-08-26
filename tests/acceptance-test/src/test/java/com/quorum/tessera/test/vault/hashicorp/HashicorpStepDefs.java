@@ -967,7 +967,7 @@ public class HashicorpStepDefs implements En {
       return makeHttpRequestAndGetResponse(
           UriBuilder.fromUri(uri).path(path).build().toURL(), method, data, headers);
     } catch (Exception ex) {
-      throw new RuntimeException(ex);
+      throw new TestRuntimeException(ex);
     }
   }
 
