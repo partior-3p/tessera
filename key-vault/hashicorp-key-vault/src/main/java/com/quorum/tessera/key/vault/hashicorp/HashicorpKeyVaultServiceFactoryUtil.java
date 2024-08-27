@@ -77,10 +77,28 @@ class HashicorpKeyVaultServiceFactoryUtil {
       EnvironmentVariableProvider envProvider,
       ClientHttpRequestFactory clientHttpRequestFactory,
       VaultEndpoint vaultEndpoint) {
+    return configureClientAuthentication(
+        keyVaultConfig,
+        envProvider,
+        clientHttpRequestFactory,
+        vaultEndpoint,
+        HASHICORP_ROLE_ID,
+        HASHICORP_SECRET_ID,
+        HASHICORP_TOKEN);
+  }
 
-    final String roleId = envProvider.getEnv(HASHICORP_ROLE_ID);
-    final String secretId = envProvider.getEnv(HASHICORP_SECRET_ID);
-    final String authToken = envProvider.getEnv(HASHICORP_TOKEN);
+  ClientAuthentication configureClientAuthentication(
+      KeyVaultConfig keyVaultConfig,
+      EnvironmentVariableProvider envProvider,
+      ClientHttpRequestFactory clientHttpRequestFactory,
+      VaultEndpoint vaultEndpoint,
+      String envVarHashicorpRoleId,
+      String envVarHashicorpSecretId,
+      String envVarHashicorpToken) {
+
+    final String roleId = envProvider.getEnv(envVarHashicorpRoleId);
+    final String secretId = envProvider.getEnv(envVarHashicorpSecretId);
+    final String authToken = envProvider.getEnv(envVarHashicorpToken);
 
     if (roleId != null && secretId != null) {
 
@@ -110,20 +128,20 @@ class HashicorpKeyVaultServiceFactoryUtil {
 
       throw new HashicorpCredentialNotSetException(
           "Both "
-              + HASHICORP_ROLE_ID
+              + envVarHashicorpRoleId
               + " and "
-              + HASHICORP_SECRET_ID
+              + envVarHashicorpSecretId
               + " environment variables must be set to use the AppRole authentication method");
 
     } else if (authToken == null) {
 
       throw new HashicorpCredentialNotSetException(
           "Both "
-              + HASHICORP_ROLE_ID
+              + envVarHashicorpRoleId
               + " and "
-              + HASHICORP_SECRET_ID
+              + envVarHashicorpSecretId
               + " environment variables must be set to use the AppRole authentication method.  Alternatively set "
-              + HASHICORP_TOKEN
+              + envVarHashicorpToken
               + " to authenticate using the Token method");
     }
 

@@ -1,5 +1,7 @@
 package com.quorum.tessera.key.vault.hashicorp;
 
+import static com.quorum.tessera.config.util.EnvironmentVariables.*;
+
 import com.quorum.tessera.config.Config;
 import com.quorum.tessera.config.ConfigException;
 import com.quorum.tessera.config.KeyVaultConfig;
@@ -32,7 +34,10 @@ public class HashicorpDbCredentialsVaultServiceFactory extends HashicorpVaultSer
         envProvider,
         util,
         this::getKeyVaultConfig,
-        HashicorpDbCredentialsVaultService::new);
+        HashicorpDbCredentialsVaultService::new,
+        HASHICORP_DSE_ROLE_ID,
+        HASHICORP_DSE_SECRET_ID,
+        HASHICORP_DSE_TOKEN);
   }
 
   private KeyVaultConfig getKeyVaultConfig(Config config) {

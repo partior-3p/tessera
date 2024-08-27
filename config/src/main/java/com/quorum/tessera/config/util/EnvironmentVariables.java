@@ -24,6 +24,12 @@ public final class EnvironmentVariables {
 
   public static final String HASHICORP_TOKEN = "HASHICORP_TOKEN";
 
+  public static final String HASHICORP_DSE_ROLE_ID = "HASHICORP_DSE_ROLE_ID";
+
+  public static final String HASHICORP_DSE_SECRET_ID = "HASHICORP_DSE_SECRET_ID";
+
+  public static final String HASHICORP_DSE_TOKEN = "HASHICORP_DSE_TOKEN";
+
   public static final String HASHICORP_CLIENT_KEYSTORE_PWD = "HASHICORP_CLIENT_KEYSTORE_PWD";
 
   public static final String HASHICORP_CLIENT_TRUSTSTORE_PWD = "HASHICORP_CLIENT_TRUSTSTORE_PWD";

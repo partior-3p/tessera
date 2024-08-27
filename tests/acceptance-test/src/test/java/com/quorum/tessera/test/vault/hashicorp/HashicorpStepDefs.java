@@ -787,6 +787,21 @@ public class HashicorpStepDefs implements En {
         });
 
     Then(
+        "Tessera will fetch a missing transaction and successfully get a response of not found",
+        () -> {
+          var response =
+              makeHttpRequestAndGetResponse(
+                  "http://localhost:18080",
+                  "/transaction/c2FtcGxldGVzc2VyYWtleQ==",
+                  "GET",
+                  null,
+                  Map.of());
+          assertThat(response.getResponseCode()).isEqualTo(HttpsURLConnection.HTTP_NOT_FOUND);
+          assertThat(response.getResponseBody())
+              .startsWith("Message with hash c2FtcGxldGVzc2VyYWtleQ== was not found");
+        });
+
+    Then(
         "Tessera will retrieve the key pair from the vault",
         () -> {
           final URL partyInfoUrl =
@@ -974,7 +989,7 @@ public class HashicorpStepDefs implements En {
   private TestHttpReponse makeHttpRequestAndGetResponse(
       URL url, String method, String data, Map<String, String> headers) {
     try {
-      HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+      HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 
       urlConnection.setDoOutput(true);
       urlConnection.setRequestMethod(method);
@@ -992,7 +1007,11 @@ public class HashicorpStepDefs implements En {
 
       StringBuilder stringBodyContent = new StringBuilder();
       try (BufferedReader reader =
-          new BufferedReader(new InputStreamReader(urlConnection.getInputStream()))) {
+          new BufferedReader(
+              new InputStreamReader(
+                  urlConnection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND
+                      ? urlConnection.getErrorStream()
+                      : urlConnection.getInputStream()))) {
         String line;
         while ((line = reader.readLine()) != null) {
           stringBodyContent.append(line);
@@ -1041,11 +1060,14 @@ public class HashicorpStepDefs implements En {
     if ("token".equals(authMethod)) {
       Objects.requireNonNull(vaultToken);
       tesseraEnvironment.put(HASHICORP_TOKEN, vaultToken);
+      tesseraEnvironment.put(HASHICORP_DSE_TOKEN, vaultToken);
     } else {
       Objects.requireNonNull(approleRoleId);
       Objects.requireNonNull(approleSecretId);
       tesseraEnvironment.put(HASHICORP_ROLE_ID, approleRoleId);
       tesseraEnvironment.put(HASHICORP_SECRET_ID, approleSecretId);
+      tesseraEnvironment.put(HASHICORP_DSE_ROLE_ID, approleRoleId);
+      tesseraEnvironment.put(HASHICORP_DSE_SECRET_ID, approleSecretId);
     }
 
     try {
