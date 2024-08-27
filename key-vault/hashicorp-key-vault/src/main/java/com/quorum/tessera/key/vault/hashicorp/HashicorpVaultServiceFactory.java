@@ -54,7 +54,7 @@ class HashicorpVaultServiceFactory {
       Function<Config, KeyVaultConfig> keyVaultConfigProvider,
       BiFunction<VaultOperations, KeyVaultConfig, R> keyVaultServiceProvider,
       String envVarHashicorpRoleId,
-      String envVarhasHicorpSecretId,
+      String envVarHashicorpSecretId,
       String envVarHashicorpToken) {
 
     Objects.requireNonNull(config);
@@ -64,7 +64,7 @@ class HashicorpVaultServiceFactory {
     Objects.requireNonNull(keyVaultServiceProvider);
 
     final String roleId = envProvider.getEnv(envVarHashicorpRoleId);
-    final String secretId = envProvider.getEnv(envVarhasHicorpSecretId);
+    final String secretId = envProvider.getEnv(envVarHashicorpSecretId);
     final String authToken = envProvider.getEnv(envVarHashicorpToken);
 
     if (roleId == null && secretId == null && authToken == null) {
@@ -72,7 +72,7 @@ class HashicorpVaultServiceFactory {
           "Environment variables must be set to authenticate with Hashicorp Vault.  Set the "
               + envVarHashicorpRoleId
               + " and "
-              + envVarhasHicorpSecretId
+              + envVarHashicorpSecretId
               + " environment variables if using the AppRole authentication method.  Set the "
               + envVarHashicorpToken
               + " environment variable if using another authentication method.");
@@ -81,7 +81,7 @@ class HashicorpVaultServiceFactory {
           "Only one of the "
               + envVarHashicorpRoleId
               + " and "
-              + envVarhasHicorpSecretId
+              + envVarHashicorpSecretId
               + " environment variables to authenticate with Hashicorp Vault using the AppRole method has been set");
     }
 
@@ -112,7 +112,7 @@ class HashicorpVaultServiceFactory {
             clientHttpRequestFactory,
             vaultEndpoint,
             envVarHashicorpRoleId,
-            envVarhasHicorpSecretId,
+            envVarHashicorpSecretId,
             envVarHashicorpToken);
 
     SessionManager sessionManager = new SimpleSessionManager(clientAuthentication);
