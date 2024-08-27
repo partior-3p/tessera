@@ -36,6 +36,26 @@ class HashicorpVaultServiceFactory {
       HashicorpKeyVaultServiceFactoryUtil util,
       Function<Config, KeyVaultConfig> keyVaultConfigProvider,
       BiFunction<VaultOperations, KeyVaultConfig, R> keyVaultServiceProvider) {
+    return create(
+        config,
+        envProvider,
+        util,
+        keyVaultConfigProvider,
+        keyVaultServiceProvider,
+        HASHICORP_ROLE_ID,
+        HASHICORP_SECRET_ID,
+        HASHICORP_TOKEN);
+  }
+
+  <R> R create(
+      Config config,
+      EnvironmentVariableProvider envProvider,
+      HashicorpKeyVaultServiceFactoryUtil util,
+      Function<Config, KeyVaultConfig> keyVaultConfigProvider,
+      BiFunction<VaultOperations, KeyVaultConfig, R> keyVaultServiceProvider,
+      String envVarHashicorpRoleId,
+      String envVarHashicorpSecretId,
+      String envVarHashicorpToken) {
 
     Objects.requireNonNull(config);
     Objects.requireNonNull(envProvider);
@@ -43,25 +63,25 @@ class HashicorpVaultServiceFactory {
     Objects.requireNonNull(keyVaultConfigProvider);
     Objects.requireNonNull(keyVaultServiceProvider);
 
-    final String roleId = envProvider.getEnv(HASHICORP_ROLE_ID);
-    final String secretId = envProvider.getEnv(HASHICORP_SECRET_ID);
-    final String authToken = envProvider.getEnv(HASHICORP_TOKEN);
+    final String roleId = envProvider.getEnv(envVarHashicorpRoleId);
+    final String secretId = envProvider.getEnv(envVarHashicorpSecretId);
+    final String authToken = envProvider.getEnv(envVarHashicorpToken);
 
     if (roleId == null && secretId == null && authToken == null) {
       throw new HashicorpCredentialNotSetException(
           "Environment variables must be set to authenticate with Hashicorp Vault.  Set the "
-              + HASHICORP_ROLE_ID
+              + envVarHashicorpRoleId
               + " and "
-              + HASHICORP_SECRET_ID
+              + envVarHashicorpSecretId
               + " environment variables if using the AppRole authentication method.  Set the "
-              + HASHICORP_TOKEN
+              + envVarHashicorpToken
               + " environment variable if using another authentication method.");
     } else if (isOnlyOneInputNull(roleId, secretId)) {
       throw new HashicorpCredentialNotSetException(
           "Only one of the "
-              + HASHICORP_ROLE_ID
+              + envVarHashicorpRoleId
               + " and "
-              + HASHICORP_SECRET_ID
+              + envVarHashicorpSecretId
               + " environment variables to authenticate with Hashicorp Vault using the AppRole method has been set");
     }
 
@@ -87,7 +107,13 @@ class HashicorpVaultServiceFactory {
 
     ClientAuthentication clientAuthentication =
         util.configureClientAuthentication(
-            keyVaultConfig, envProvider, clientHttpRequestFactory, vaultEndpoint);
+            keyVaultConfig,
+            envProvider,
+            clientHttpRequestFactory,
+            vaultEndpoint,
+            envVarHashicorpRoleId,
+            envVarHashicorpSecretId,
+            envVarHashicorpToken);
 
     SessionManager sessionManager = new SimpleSessionManager(clientAuthentication);
 

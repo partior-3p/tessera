@@ -18,3 +18,4 @@ Feature: Hashicorp Vault support with DB Secret Engine
     -configfile %s -pidfile %s -o jdbc.autoCreateTables=true
     """
     Then Tessera will retrieve the key pair from the vault
+    Then Tessera will fetch a missing transaction and successfully get a response of not found

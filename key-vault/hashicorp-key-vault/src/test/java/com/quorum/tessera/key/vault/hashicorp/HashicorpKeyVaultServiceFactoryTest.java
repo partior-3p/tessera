@@ -268,6 +268,15 @@ public class HashicorpKeyVaultServiceFactoryTest {
             eq(clientHttpRequestFactory),
             any(VaultEndpoint.class)))
         .thenReturn(clientAuthentication);
+    when(keyVaultServiceFactoryUtil.configureClientAuthentication(
+            eq(keyVaultConfig),
+            eq(envProvider),
+            eq(clientHttpRequestFactory),
+            any(VaultEndpoint.class),
+            anyString(),
+            anyString(),
+            anyString()))
+        .thenReturn(clientAuthentication);
     when(keyVaultServiceFactoryUtil.getRestTemplateWithVaultNamespace(
             anyString(), eq(clientHttpRequestFactory), any(VaultEndpoint.class)))
         .thenReturn(restTemplateBuilder);
