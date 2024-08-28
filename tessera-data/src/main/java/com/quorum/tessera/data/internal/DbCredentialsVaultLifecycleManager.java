@@ -2,10 +2,12 @@ package com.quorum.tessera.data.internal;
 
 import com.quorum.tessera.config.ConfigException;
 import com.quorum.tessera.config.JdbcConfig;
+import com.quorum.tessera.key.vault.DbCredentials;
 import com.quorum.tessera.key.vault.DbCredentialsVaultService;
 import com.zaxxer.hikari.HikariDataSource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -24,6 +26,8 @@ public class DbCredentialsVaultLifecycleManager {
   private final HikariDataSource hikariDataSource;
 
   private final ScheduledExecutorService scheduledExecutorService;
+
+  private DbCredentials currentDbCredentials;
 
   private long retryDelayInSeconds = 2;
   private int maxRetryDelayInSeconds = 60;
@@ -53,6 +57,18 @@ public class DbCredentialsVaultLifecycleManager {
     return retryDelayInSeconds * (long) Math.pow(factor, retryCount);
   }
 
+  private void keepTrackOfCurrentDbCredentials(DbCredentials credentials){
+    this.currentDbCredentials = credentials;
+  }
+
+  private boolean isDbCredentialChanged(DbCredentials newCredentials){
+    if (this.currentDbCredentials == null){
+      return true;
+    }
+    return !Objects.equals(this.currentDbCredentials.getUsername(), newCredentials.getUsername()) ||
+      !Objects.equals(this.currentDbCredentials.getPassword(), newCredentials.getPassword());
+  }
+
   private void checkAndRetrieveNewDbCredentials() {
     try {
       LOGGER.info("Checking for new db credentials from vault ...");
@@ -61,17 +77,21 @@ public class DbCredentialsVaultLifecycleManager {
       final long adjustedDelayBeforeNextRunInSeconds =
           getDelayBeforeNextRunInSecondsBasedOnTtl(credentials.getLeaseDurationInSec());
 
-      final var hikariConfigMXBean = hikariDataSource.getHikariConfigMXBean();
-      hikariConfigMXBean.setUsername(credentials.getUsername());
-      hikariConfigMXBean.setPassword(credentials.getPassword());
+      if (isDbCredentialChanged(credentials)) {
+        final var hikariConfigMXBean = hikariDataSource.getHikariConfigMXBean();
+        hikariConfigMXBean.setUsername(credentials.getUsername());
+        hikariConfigMXBean.setPassword(credentials.getPassword());
 
-      final var hikariPoolMXBean = hikariDataSource.getHikariPoolMXBean();
-      hikariPoolMXBean.softEvictConnections();
+        final var hikariPoolMXBean = hikariDataSource.getHikariPoolMXBean();
+        hikariPoolMXBean.softEvictConnections();
+        keepTrackOfCurrentDbCredentials(credentials);
 
+        LOGGER.info("Db credentials changed. Updated the connection pool successfully.");
+      }
       scheduledExecutorService.schedule(
-          this::checkAndRetrieveNewDbCredentials,
-          adjustedDelayBeforeNextRunInSeconds,
-          TimeUnit.SECONDS);
+        this::checkAndRetrieveNewDbCredentials,
+        adjustedDelayBeforeNextRunInSeconds,
+        TimeUnit.SECONDS);
       retryCount = 0;
       LOGGER.info(
           "Checking for new db credentials from vault was successful. checking again after {} seconds",
