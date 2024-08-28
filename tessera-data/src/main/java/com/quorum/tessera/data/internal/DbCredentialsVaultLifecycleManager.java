@@ -57,16 +57,16 @@ public class DbCredentialsVaultLifecycleManager {
     return retryDelayInSeconds * (long) Math.pow(factor, retryCount);
   }
 
-  private void keepTrackOfCurrentDbCredentials(DbCredentials credentials){
+  private void keepTrackOfCurrentDbCredentials(DbCredentials credentials) {
     this.currentDbCredentials = credentials;
   }
 
-  private boolean isDbCredentialChanged(DbCredentials newCredentials){
-    if (this.currentDbCredentials == null){
+  private boolean isDbCredentialChanged(DbCredentials newCredentials) {
+    if (this.currentDbCredentials == null) {
       return true;
     }
-    return !Objects.equals(this.currentDbCredentials.getUsername(), newCredentials.getUsername()) ||
-      !Objects.equals(this.currentDbCredentials.getPassword(), newCredentials.getPassword());
+    return !Objects.equals(this.currentDbCredentials.getUsername(), newCredentials.getUsername())
+        || !Objects.equals(this.currentDbCredentials.getPassword(), newCredentials.getPassword());
   }
 
   private void checkAndRetrieveNewDbCredentials() {
@@ -89,9 +89,9 @@ public class DbCredentialsVaultLifecycleManager {
         LOGGER.info("Db credentials changed. Updated the connection pool successfully.");
       }
       scheduledExecutorService.schedule(
-        this::checkAndRetrieveNewDbCredentials,
-        adjustedDelayBeforeNextRunInSeconds,
-        TimeUnit.SECONDS);
+          this::checkAndRetrieveNewDbCredentials,
+          adjustedDelayBeforeNextRunInSeconds,
+          TimeUnit.SECONDS);
       retryCount = 0;
       LOGGER.info(
           "Checking for new db credentials from vault was successful. checking again after {} seconds",
