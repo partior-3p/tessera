@@ -35,9 +35,13 @@ public class HashicorpSimpleSessionManager implements SessionManager {
     if (this.token.isEmpty()) {
       return true;
     }
-    LoginToken loginToken = (LoginToken) this.token.get();
-    Duration ttlAdjusted = loginToken.getLeaseDuration().minus(safetyMarginInSeconds);
-    return Duration.between(tokenStartTime, Instant.now()).getSeconds() >= ttlAdjusted.getSeconds();
+    if (this.token.get() instanceof LoginToken) {
+      LoginToken loginToken = (LoginToken) this.token.get();
+      Duration ttlAdjusted = loginToken.getLeaseDuration().minus(safetyMarginInSeconds);
+      return Duration.between(tokenStartTime, Instant.now()).getSeconds()
+          >= ttlAdjusted.getSeconds();
+    }
+    return false;
   }
 
   @Override
