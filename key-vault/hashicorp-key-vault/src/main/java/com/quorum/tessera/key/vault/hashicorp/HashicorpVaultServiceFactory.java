@@ -115,7 +115,7 @@ class HashicorpVaultServiceFactory {
             envVarHashicorpSecretId,
             envVarHashicorpToken);
 
-    SessionManager sessionManager = new SimpleSessionManager(clientAuthentication);
+    SessionManager sessionManager = new HashicorpSimpleSessionManager(clientAuthentication);
 
     VaultOperations vaultOperations =
         getVaultOperations(
