@@ -1,18 +1,16 @@
 package com.quorum.tessera.key.vault.hashicorp;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.LoginToken;
 import org.springframework.vault.authentication.SessionManager;
-import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.support.VaultToken;
-
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Optional;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class HashicorpSimpleSessionManager implements SessionManager {
 
@@ -33,11 +31,11 @@ public class HashicorpSimpleSessionManager implements SessionManager {
     this.clientAuthentication = clientAuthentication;
   }
 
-  private boolean isTokenEmptyOrExpired(){
-    if (this.token.isEmpty()){
+  private boolean isTokenEmptyOrExpired() {
+    if (this.token.isEmpty()) {
       return true;
     }
-    LoginToken loginToken = (LoginToken)this.token.get();
+    LoginToken loginToken = (LoginToken) this.token.get();
     Duration ttlAdjusted = loginToken.getLeaseDuration().minus(safetyMarginInSeconds);
     return Duration.between(tokenStartTime, Instant.now()).getSeconds() >= ttlAdjusted.getSeconds();
   }
@@ -53,8 +51,7 @@ public class HashicorpSimpleSessionManager implements SessionManager {
           this.tokenStartTime = Instant.now();
           LOGGER.info("Successfully retrieved new vault token.");
         }
-      }
-      finally {
+      } finally {
         this.lock.unlock();
       }
     }
