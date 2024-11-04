@@ -5,6 +5,7 @@ import com.quorum.tessera.enclave.Enclave;
 import com.quorum.tessera.enclave.EncodedPayload;
 import com.quorum.tessera.encryption.PublicKey;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
 
@@ -35,6 +36,8 @@ public interface TransactionManager {
    * @return
    */
   PublicKey defaultPublicKey();
+
+  Map<String, Long> getTransactionCount();
 
   static TransactionManager create() {
     return ServiceLoader.load(TransactionManager.class).findFirst().get();

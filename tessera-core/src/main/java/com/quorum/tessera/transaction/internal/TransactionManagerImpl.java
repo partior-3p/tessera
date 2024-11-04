@@ -499,6 +499,14 @@ public class TransactionManagerImpl implements TransactionManager {
     return enclave.defaultPublicKey();
   }
 
+  @Override
+  public Map<String, Long> getTransactionCount() {
+    var txnCountMap = new HashMap<String, Long>();
+    txnCountMap.put("encryptedTransaction", encryptedTransactionDAO.transactionCount());
+    txnCountMap.put("encryptedRawTransaction", encryptedRawTransactionDAO.transactionCount());
+    return txnCountMap;
+  }
+
   private EncodedPayload fetchPayload(final MessageHash hash) {
     return encryptedTransactionDAO
         .retrieveByHash(hash)

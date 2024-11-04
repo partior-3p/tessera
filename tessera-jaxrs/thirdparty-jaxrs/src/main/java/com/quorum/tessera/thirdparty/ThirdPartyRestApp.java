@@ -35,10 +35,12 @@ public class ThirdPartyRestApp extends TesseraRestApplication
   public Set<Object> getSingletons() {
     final RawTransactionResource rawTransactionResource =
         new RawTransactionResource(transactionManager);
+    final DbInfoResource dbInfoResource = new DbInfoResource(transactionManager);
     final PartyInfoResource partyInfoResource = new PartyInfoResource(discovery);
     final KeyResource keyResource = new KeyResource();
     final UpCheckResource upCheckResource = new UpCheckResource();
-    return Set.of(rawTransactionResource, partyInfoResource, keyResource, upCheckResource);
+    return Set.of(
+        rawTransactionResource, partyInfoResource, keyResource, upCheckResource, dbInfoResource);
   }
 
   @Override
