@@ -42,7 +42,7 @@ public class ThirdPartyRestAppTest {
 
     Set<Object> results = thirdParty.getSingletons();
 
-    assertThat(results).hasSize(4);
+    assertThat(results).hasSize(5);
     List<Class> types = results.stream().map(Object::getClass).collect(Collectors.toList());
     assertThat(types)
         .containsExactlyInAnyOrder(
